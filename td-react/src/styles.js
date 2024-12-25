@@ -90,7 +90,8 @@ export const Styles = {
     padding: '1rem',
     textAlign: 'center',
     zIndex: 1000
-  }
+  },
+  
 
   
 };
