@@ -115,7 +115,7 @@ const CreateNotes = ({ onAddNote }) => {
           !newNote.grade
         }
       >
-        Ajouter la note
+        Ajouter la note1
       </Button>
     </Box>
   );

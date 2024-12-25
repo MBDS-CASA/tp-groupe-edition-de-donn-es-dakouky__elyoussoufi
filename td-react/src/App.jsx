@@ -19,6 +19,8 @@ import {
   Info as AboutIcon,
   
 } from '@mui/icons-material';
+import Dashboard from '@mui/icons-material/Dashboard';
+import DashboardComponent from './components/DashboardComponemnt';
 import AddIcon from '@mui/icons-material/Add';
 
 import NotesComponent from './components/NotesComponent';
@@ -94,6 +96,7 @@ const App = () => {
   const [activeMenu, setActiveMenu] = useState('Notes');
 
   const menuItems = [
+    { name: 'Tableau de Bord', icon: <Dashboard />, component: <DashboardComponent data={data} /> },
     { name: 'Notes', icon: <NotesIcon />, component: <NotesComponent data={data} /> },
     { name: 'Étudiants', icon: <StudentsIcon />, component: <StudentsComponent data={data} /> },
     { name: 'Matières', icon: <SubjectsIcon />, component: <SubjectsComponent data={data} /> },
