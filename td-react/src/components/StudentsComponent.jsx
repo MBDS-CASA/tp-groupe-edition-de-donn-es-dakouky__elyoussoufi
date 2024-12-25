@@ -1,131 +1,288 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
-  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
   TextField,
+  Button,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Pagination,
+  Paper,
   Grid,
-  Pagination
+  ButtonGroup,
+  styled
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import SortIcon from '@mui/icons-material/Sort';
 
-import { Styles } from '../styles';
+const StyledListItem = styled(ListItem)(({ theme }) => ({
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  transition: 'background-color 0.2s ease',
+}));
 
-const StudentsComponent = ({ data }) => {
-/**
- * Component to display the list of students
- * @param {{data: Array<import("../types").Student>}} props
- * @returns {JSX.Element}
- */
-  const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  /**
-   * Search term to filter students
-   */
-  const itemsPerPage = 6;
-  /**
-   * Number of items per page
-   */
+const FiltersContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(3),
+  flexWrap: 'wrap'
+}));
 
-  if (!data || !Array.isArray(data)) {
-    return <Box>Aucune donnée disponible</Box>;
+const ActionsContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(3),
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: 'column'
   }
+}));
 
-  const students = Array.from(
-  /**
-   * Unique list of students
-   */
-    new Set(data.map((item) => JSON.stringify(item.student)))
-  ).map((student) => JSON.parse(student));
+const StudentsManager = ({ data }) => {
+  const [students, setStudents] = useState(data);
+  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState({
+    search: '',
+    sortBy: null
+  });
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [dialogForm, setDialogForm] = useState({
+    firstname: '',
+    lastname: ''
+  });
+  const itemsPerPage = 10;
 
-  const filteredStudents = students.filter(student =>
-  /**
-   * Filtered list of students based on the search term
-   */
-    `${student.firstname} ${student.lastname}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    setStudents(data);
+  }, [data]);
+
+  const sortStudents = (students) => {
+    if (!filters.sortBy) return students;
+
+    return [...students].sort((a, b) => {
+      const valueA = a.student[filters.sortBy].toLowerCase();
+      const valueB = b.student[filters.sortBy].toLowerCase();
+      return valueA.localeCompare(valueB);
+    });
+  };
+
+  const filteredStudents = sortStudents(
+    students.filter((student) => {
+      const matchesSearch = `${student.student.firstname} ${student.student.lastname}`
+        .toLowerCase()
+        .includes(filters.search.toLowerCase());
+      return matchesSearch;
+    })
   );
 
   const paginatedStudents = filteredStudents.slice(
-  /**
-   * Paginated list of students
-   */
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
 
+  const handleSort = (field) => {
+    setFilters((prev) => ({
+      ...prev,
+      sortBy: prev.sortBy === field ? null : field
+    }));
+  };
+
+  const handleOpenDialog = (student = null) => {
+    setEditingStudent(student);
+    setDialogForm(student ? student.student : { firstname: '', lastname: '' });
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setEditingStudent(null);
+    setDialogForm({ firstname: '', lastname: '' });
+  };
+
+  const handleSubmit = () => {
+    if (editingStudent) {
+      setStudents((prev) =>
+        prev.map((s) =>
+          s.unique_id === editingStudent.unique_id
+            ? { ...s, student: { ...dialogForm } }
+            : s
+        )
+      );
+    } else {
+      setStudents((prev) => [
+        ...prev,
+        {
+          unique_id: Math.random().toString(36).substr(2, 9),
+          student: { ...dialogForm }
+        }
+      ]);
+    }
+    handleCloseDialog();
+  };
+
+  const handleDelete = (id) => {
+    setStudents((prev) => prev.filter((student) => student.unique_id !== id));
+  };
+
+
+  const exportToCSV = () => {
+    const csvContent = [
+      ['Prénom', 'Nom'],
+      ...filteredStudents.map((student) => [
+        student.student.firstname,
+        student.student.lastname
+      ])
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
+  
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'students_filtered.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+
   return (
-    <Box sx={{ width: '100%' }}>
-     <TextField
-  sx={{
-    ...Styles.searchField, 
-    backgroundColor: '#f5f5f5', 
-    '& .MuiOutlinedInput-root': {
-      backgroundColor: '#f5f5f5',
-      '& fieldset': {
-        borderColor: '#ccc', 
-      },
-      '&:hover fieldset': {
-        borderColor: '#aaa', 
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: '#000', 
-      },
-    },
-  }}
-  fullWidth
-  variant="outlined"
-  label="Rechercher un étudiant"
-  margin="normal"
-  onChange={(e) => setSearchTerm(e.target.value)}
-/>
-
-
-      <Grid container spacing={2} sx={{ my: 2 }}>
-        {paginatedStudents.map((student) => (
-          <Grid item xs={12} sm={6} md={4} key={student.id}>
-            <Card sx={Styles.card}>
-              <CardContent>
-                <Typography variant="h6">
-                  {student.firstname} {student.lastname}
-                </Typography>
-                <Typography color="textSecondary">
-                  ID: {student.id}
-                </Typography>
-              </CardContent>
-            </Card>
+    <Box sx={{ width: '100%', p: 3 }}>
+      <FiltersContainer>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Rechercher un étudiant (nom ou prénom)"
+              value={filters.search}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, search: e.target.value }))
+              }
+            />
           </Grid>
-        ))}
-      </Grid>
+        </Grid>
+      </FiltersContainer>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-      <Pagination 
-  sx={{
-    ...Styles.pagination, // Conserve les styles existants définis dans Styles.pagination
-    backgroundColor: '#f5f5f5', // Fond gris clair pour l'ensemble de la pagination
-    '& .MuiPaginationItem-root': {
-      backgroundColor: '#f5f5f5', // Fond des items de pagination
-      borderColor: '#ccc', // Bordure des items
-      '&:hover': {
-        backgroundColor: '#e0e0e0', // Fond au survol
-        borderColor: '#aaa', // Bordure au survol
-      },
-      '&.Mui-selected': {
-        backgroundColor: '#d6d6d6', // Fond pour l'élément sélectionné
-        borderColor: '#000', // Bordure pour l'élément sélectionné
-      },
-            },
-        }}
-        count={Math.ceil(filteredStudents.length / itemsPerPage)} // Calcul du nombre de pages
-        page={page} // Page actuelle
-        onChange={(e, value) => setPage(value)} // Gestion du changement de page
+      <ActionsContainer>
+        <ButtonGroup variant="contained">
+          <Button onClick={() => handleOpenDialog()}>Ajouter un étudiant</Button>
+          <Button startIcon={<FileDownloadIcon />} onClick={exportToCSV}>
+            Exporter CSV
+          </Button>
+        </ButtonGroup>
+
+        <ButtonGroup variant="outlined">
+          <Button
+            startIcon={<SortIcon />}
+            onClick={() => handleSort('firstname')}
+            color={filters.sortBy === 'firstname' ? 'primary' : 'inherit'}
+          >
+            Trier par prénom
+          </Button>
+          <Button
+            startIcon={<SortIcon />}
+            onClick={() => handleSort('lastname')}
+            color={filters.sortBy === 'lastname' ? 'primary' : 'inherit'}
+          >
+            Trier par nom
+          </Button>
+        </ButtonGroup>
+      </ActionsContainer>
+
+      <Paper elevation={3} sx={{ width: '100%', mb: 3 }}>
+        <List>
+          {paginatedStudents.map((student) => (
+            <StyledListItem key={student.unique_id} divider>
+              <ListItemText
+                primary={`${student.student.firstname} ${student.student.lastname}`}
+                secondary={`ID: ${student.unique_id}`}
+              />
+              <ListItemSecondaryAction>
+                <IconButton
+                  edge="end"
+                  color="primary"
+                  onClick={() => handleOpenDialog(student)}
+                  sx={{ mr: 1 }}
+                >
+                  <EditIcon />
+                </IconButton>
+                <IconButton
+                  edge="end"
+                  color="error"
+                  onClick={() => handleDelete(student.unique_id)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </StyledListItem>
+          ))}
+        </List>
+      </Paper>
+
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Pagination
+          count={Math.ceil(filteredStudents.length / itemsPerPage)}
+          page={page}
+          onChange={(e, value) => setPage(value)}
+          color="primary"
         />
-
       </Box>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>
+          {editingStudent ? 'Modifier un étudiant' : 'Ajouter un étudiant'}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Prénom"
+            fullWidth
+            variant="outlined"
+            value={dialogForm.firstname}
+            onChange={(e) =>
+              setDialogForm((prev) => ({
+                ...prev,
+                firstname: e.target.value
+              }))
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Nom"
+            fullWidth
+            variant="outlined"
+            value={dialogForm.lastname}
+            onChange={(e) =>
+              setDialogForm((prev) => ({
+                ...prev,
+                lastname: e.target.value
+              }))
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">
+            Annuler
+          </Button>
+          <Button onClick={handleSubmit} color="primary">
+            {editingStudent ? 'Mettre à jour' : 'Ajouter'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
 
-
-export default StudentsComponent;
+export default StudentsManager;
