@@ -16,35 +16,119 @@ import {
   Paper,
   Grid,
   ButtonGroup,
-  styled
+  alpha,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import SortIcon from '@mui/icons-material/Sort';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
 
-const StyledListItem = styled(ListItem)(({ theme }) => ({
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
+const customStyles = {
+  container: {
+    width: '100%',
+    padding: '2rem',
+    backgroundColor: '#140524',
+    borderRadius: '12px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
   },
-  transition: 'background-color 0.2s ease',
-}));
-
-const FiltersContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(2),
-  marginBottom: theme.spacing(3),
-  flexWrap: 'wrap'
-}));
-
-const ActionsContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(2),
-  marginBottom: theme.spacing(3),
-  [theme.breakpoints.down('sm')]: {
-    flexDirection: 'column'
-  }
-}));
+  searchBar: {
+    display: 'flex',
+    gap: '1rem',
+    marginBottom: '2rem',
+    alignItems: 'center',
+  },
+  textField: {
+    '& .MuiOutlinedInput-root': {
+      backgroundColor: alpha('#ffffff', 0.05),
+      color: '#ebe7ef',
+      '& fieldset': {
+        borderColor: alpha('#7925d3', 0.3),
+      },
+      '&:hover fieldset': {
+        borderColor: '#7925d3',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#7925d3',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: '#a18aba',
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#7925d3',
+    },
+  },
+  button: {
+    backgroundColor: '#7925d3',
+    color: '#ebe7ef',
+    '&:hover': {
+      backgroundColor: '#8935e3',
+    },
+  },
+  outlinedButton: {
+    color: '#ebe7ef',
+    borderColor: alpha('#7925d3', 0.3),
+    '&:hover': {
+      backgroundColor: alpha('#7925d3', 0.2),
+      borderColor: '#7925d3',
+    },
+    '&.active': {
+      backgroundColor: '#7925d3',
+      borderColor: '#7925d3',
+    },
+  },
+  listContainer: {
+    backgroundColor: alpha('#140524', 0.6),
+    borderRadius: '8px',
+    marginBottom: '1rem',
+    '& .MuiListItem-root': {
+      borderBottom: `1px solid ${alpha('#7925d3', 0.2)}`,
+      '&:hover': {
+        backgroundColor: alpha('#7925d3', 0.1),
+      },
+    },
+    '& .MuiListItemText-primary': {
+      color: '#ebe7ef',
+    },
+    '& .MuiListItemText-secondary': {
+      color: '#a18aba',
+    },
+  },
+  iconButton: {
+    color: '#a18aba',
+    '&:hover': {
+      backgroundColor: alpha('#7925d3', 0.2),
+      color: '#ebe7ef',
+    },
+  },
+  dialog: {
+    '& .MuiDialog-paper': {
+      backgroundColor: '#140524',
+      color: '#ebe7ef',
+      padding: '1rem',
+    },
+    '& .MuiDialogTitle-root': {
+      color: '#ebe7ef',
+    },
+  },
+  pagination: {
+    '& .MuiPaginationItem-root': {
+      color: '#ebe7ef',
+      borderColor: alpha('#7925d3', 0.3),
+      '&:hover': {
+        backgroundColor: alpha('#7925d3', 0.2),
+      },
+      '&.Mui-selected': {
+        backgroundColor: '#7925d3',
+        '&:hover': {
+          backgroundColor: '#8935e3',
+        },
+      },
+    },
+  },
+};
 
 const StudentsManager = ({ data }) => {
   const [students, setStudents] = useState(data);
@@ -67,7 +151,6 @@ const StudentsManager = ({ data }) => {
 
   const sortStudents = (students) => {
     if (!filters.sortBy) return students;
-
     return [...students].sort((a, b) => {
       const valueA = a.student[filters.sortBy].toLowerCase();
       const valueB = b.student[filters.sortBy].toLowerCase();
@@ -133,7 +216,6 @@ const StudentsManager = ({ data }) => {
     setStudents((prev) => prev.filter((student) => student.unique_id !== id));
   };
 
-
   const exportToCSV = () => {
     const csvContent = [
       ['Prénom', 'Nom'],
@@ -154,79 +236,103 @@ const StudentsManager = ({ data }) => {
     link.click();
     document.body.removeChild(link);
   };
-  
 
   return (
-    <Box sx={{ width: '100%', p: 3 }}>
-      <FiltersContainer>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="Rechercher un étudiant (nom ou prénom)"
-              value={filters.search}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, search: e.target.value }))
-              }
-            />
-          </Grid>
-        </Grid>
-      </FiltersContainer>
+    <Box sx={customStyles.container}>
+      <Box sx={customStyles.searchBar}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          label="Rechercher un étudiant (nom ou prénom)"
+          value={filters.search}
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ color: '#a18aba', mr: 1 }} />,
+          }}
+          onChange={(e) =>
+            setFilters((prev) => ({ ...prev, search: e.target.value }))
+          }
+          sx={customStyles.textField}
+        />
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => handleOpenDialog()}
+          sx={customStyles.button}
+        >
+          Ajouter un étudiant
+        </Button>
+      </Box>
 
-      <ActionsContainer>
-        <ButtonGroup variant="contained">
-          <Button onClick={() => handleOpenDialog()}>Ajouter un étudiant</Button>
-          <Button startIcon={<FileDownloadIcon />} onClick={exportToCSV}>
-            Exporter CSV
-          </Button>
-        </ButtonGroup>
-
-        <ButtonGroup variant="outlined">
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Button
+          variant="contained"
+          startIcon={<FileDownloadIcon />}
+          onClick={exportToCSV}
+          sx={customStyles.button}
+        >
+          Exporter CSV
+        </Button>
+        <ButtonGroup>
           <Button
+            variant="outlined"
             startIcon={<SortIcon />}
             onClick={() => handleSort('firstname')}
-            color={filters.sortBy === 'firstname' ? 'primary' : 'inherit'}
+            sx={{
+              ...customStyles.outlinedButton,
+              ...(filters.sortBy === 'firstname' && { backgroundColor: '#7925d3' }),
+            }}
           >
             Trier par prénom
           </Button>
           <Button
+            variant="outlined"
             startIcon={<SortIcon />}
             onClick={() => handleSort('lastname')}
-            color={filters.sortBy === 'lastname' ? 'primary' : 'inherit'}
+            sx={{
+              ...customStyles.outlinedButton,
+              ...(filters.sortBy === 'lastname' && { backgroundColor: '#7925d3' }),
+            }}
           >
             Trier par nom
           </Button>
         </ButtonGroup>
-      </ActionsContainer>
+      </Box>
 
-      <Paper elevation={3} sx={{ width: '100%', mb: 3 }}>
+      <Paper sx={customStyles.listContainer} elevation={3}>
         <List>
-          {paginatedStudents.map((student) => (
-            <StyledListItem key={student.unique_id} divider>
+          {paginatedStudents.length > 0 ? (
+            paginatedStudents.map((student) => (
+              <ListItem key={student.unique_id}>
+                <ListItemText
+                  primary={`${student.student.firstname} ${student.student.lastname}`}
+                  secondary={`ID: ${student.unique_id}`}
+                />
+                <ListItemSecondaryAction>
+                  <IconButton
+                    edge="end"
+                    onClick={() => handleOpenDialog(student)}
+                    sx={customStyles.iconButton}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    onClick={() => handleDelete(student.unique_id)}
+                    sx={customStyles.iconButton}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))
+          ) : (
+            <ListItem>
               <ListItemText
-                primary={`${student.student.firstname} ${student.student.lastname}`}
-                secondary={`ID: ${student.unique_id}`}
+                primary="Aucun étudiant trouvé"
+                sx={{ textAlign: 'center', color: '#a18aba' }}
               />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  color="primary"
-                  onClick={() => handleOpenDialog(student)}
-                  sx={{ mr: 1 }}
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  edge="end"
-                  color="error"
-                  onClick={() => handleDelete(student.unique_id)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </StyledListItem>
-          ))}
+            </ListItem>
+          )}
         </List>
       </Paper>
 
@@ -235,11 +341,11 @@ const StudentsManager = ({ data }) => {
           count={Math.ceil(filteredStudents.length / itemsPerPage)}
           page={page}
           onChange={(e, value) => setPage(value)}
-          color="primary"
+          sx={customStyles.pagination}
         />
       </Box>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      <Dialog open={openDialog} onClose={handleCloseDialog} sx={customStyles.dialog}>
         <DialogTitle>
           {editingStudent ? 'Modifier un étudiant' : 'Ajouter un étudiant'}
         </DialogTitle>
@@ -257,6 +363,7 @@ const StudentsManager = ({ data }) => {
                 firstname: e.target.value
               }))
             }
+            sx={customStyles.textField}
           />
           <TextField
             margin="dense"
@@ -270,13 +377,20 @@ const StudentsManager = ({ data }) => {
                 lastname: e.target.value
               }))
             }
+            sx={customStyles.textField}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="secondary">
+          <Button
+            onClick={handleCloseDialog}
+            sx={{ color: '#a18aba' }}
+          >
             Annuler
           </Button>
-          <Button onClick={handleSubmit} color="primary">
+          <Button
+            onClick={handleSubmit}
+            sx={customStyles.button}
+          >
             {editingStudent ? 'Mettre à jour' : 'Ajouter'}
           </Button>
         </DialogActions>

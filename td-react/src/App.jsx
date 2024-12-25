@@ -27,7 +27,7 @@ import NotesComponent from './components/NotesComponent';
 import StudentsComponent from './components/StudentsComponent';
 import SubjectsComponent from './components/SubjectsComponent';
 import AboutComponent from './components/AboutComponent';
-import CreateNotes from './components/CreateNotes';
+
 import data from './data.json';
 import './index.css';
 import { Styles } from './styles';
@@ -93,14 +93,13 @@ function Footer() {
 
 const App = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState('Notes');
+  const [activeMenu, setActiveMenu] = useState('Tableau de Bord');
 
   const menuItems = [
     { name: 'Tableau de Bord', icon: <Dashboard />, component: <DashboardComponent data={data} /> },
     { name: 'Notes', icon: <NotesIcon />, component: <NotesComponent data={data} /> },
     { name: 'Étudiants', icon: <StudentsIcon />, component: <StudentsComponent data={data} /> },
     { name: 'Matières', icon: <SubjectsIcon />, component: <SubjectsComponent data={data} /> },
-    { name: 'Ajouter Les Notes', icon: <AddIcon />, component: <CreateNotes /> },,
     { name: 'À propos', icon: <AboutIcon />, component: <AboutComponent /> }
   ];
 
@@ -149,13 +148,20 @@ const App = () => {
         </List>
       </Drawer>
 
-      <Box
+     <Box
         component="main"
-        sx={{ ...Styles.mainContent, flexGrow: 1 }}
+        sx={{
+          flexGrow: 1,
+          p: 1,
+          width: { sm: `calc(100% - ${250}px)` },
+          ml: { sm: `${450}px` },
+          mt: '64px', 
+          overflowX: 'hidden'
+        }}
       >
         <Header />
         <MainContent />
-        <Box className="content-container" sx={{ flex: 1, mb: 4 }}>
+        <Box className="content-container" sx={{ flex: 1, mb: 4 }} >
           {activeComponent}
         </Box>
         <Footer />

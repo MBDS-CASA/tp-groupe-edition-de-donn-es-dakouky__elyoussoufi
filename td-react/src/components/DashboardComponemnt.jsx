@@ -1,20 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  Paper,
-  Grid,
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  Divider,
-  useTheme,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Autocomplete
-} from '@mui/material';
+import { Box, Typography, Paper, Grid, Divider, alpha, useTheme } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer 
@@ -23,6 +8,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import PeopleIcon from '@mui/icons-material/People';
 import SchoolIcon from '@mui/icons-material/School';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import { Autocomplete, TextField } from '@mui/material';
 
 const DashboardComponent = ({ data }) => {
   const theme = useTheme();
@@ -94,33 +80,26 @@ const DashboardComponent = ({ data }) => {
     percentage: filteredData.length > 0 ? Math.round((count / filteredData.length) * 100) : 0
   }));
 
-  // Styles des cartes de statistiques
-  const statCardStyle = {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    padding: 2,
-    background: theme.palette.background.default,
-    transition: 'transform 0.2s',
-    '&:hover': {
-      transform: 'translateY(-5px)',
-      boxShadow: theme.shadows[4]
-    }
-  };
-
-  const COLORS = [
-    theme.palette.primary.main,
-    theme.palette.secondary.main,
-    theme.palette.success.main,
-    theme.palette.warning.main,
-    theme.palette.error.main
-  ];
+  const CHART_COLORS = ['#7925d3', '#8935e3', '#9945f3', '#a855ff', '#b865ff'];
 
   return (
-    <Box sx={{ flexGrow: 1, p: 3, backgroundColor: theme.palette.grey[100] }}>
-      {/* Filtre Étudiant */}
-      <Paper sx={{ p: 2, mb: 3 }}>
+    <Box sx={{ 
+      width: '100%',
+      padding: '2rem',
+      backgroundColor: '#140524',
+      borderRadius: '12px',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+      color: '#ebe7ef'
+    }}>
+      {/* Student Filter */}
+      <Paper sx={{ 
+        backgroundColor: alpha('#140524', 0.6),
+        color: '#ebe7ef',
+        p: 2, 
+        mb: 3,
+        borderRadius: '8px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+      }}>
         <Autocomplete
           value={selectedStudent}
           onChange={(event, newValue) => setSelectedStudent(newValue)}
@@ -132,90 +111,164 @@ const DashboardComponent = ({ data }) => {
               label="Filtrer par étudiant"
               variant="outlined"
               placeholder="Sélectionnez un étudiant"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: alpha('#ffffff', 0.05),
+                  color: '#ebe7ef',
+                  '& fieldset': {
+                    borderColor: alpha('#7925d3', 0.3),
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#7925d3',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#7925d3',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#a18aba',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#7925d3',
+                }
+              }}
             />
           )}
           sx={{ width: '100%', maxWidth: 500 }}
         />
       </Paper>
 
-      {/* Titre du dashboard */}
-      <Typography variant="h5" sx={{ mb: 3 }}>
+      {/* Dashboard Title */}
+      <Typography variant="h5" sx={{ mb: 3, color: '#ebe7ef' }}>
         {selectedStudent 
           ? `Tableau de bord de ${selectedStudent.fullName}`
           : 'Tableau de bord général'
         }
       </Typography>
 
-      {/* Cartes de statistiques */}
+      {/* Stat Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={statCardStyle}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <PeopleIcon sx={{ fontSize: 40, color: theme.palette.primary.main, mr: 2 }} />
+          <Paper sx={{
+            backgroundColor: alpha('#140524', 0.6),
+            color: '#ebe7ef',
+            padding: '1.5rem',
+            borderRadius: '8px',
+            transition: 'transform 0.2s',
+            '&:hover': {
+              transform: 'translateY(-5px)',
+              backgroundColor: alpha('#7925d3', 0.1)
+            }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <PeopleIcon sx={{ fontSize: 40, color: '#7925d3', mr: 2 }} />
               <div>
                 <Typography variant="h4">{totalStudents}</Typography>
-                <Typography variant="subtitle2" color="textSecondary">
+                <Typography variant="subtitle2" sx={{ color: '#a18aba' }}>
                   {selectedStudent ? 'Étudiant' : 'Étudiants'}
                 </Typography>
               </div>
             </Box>
           </Paper>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={statCardStyle}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <SchoolIcon sx={{ fontSize: 40, color: theme.palette.secondary.main, mr: 2 }} />
+          <Paper sx={{
+            backgroundColor: alpha('#140524', 0.6),
+            color: '#ebe7ef',
+            padding: '1.5rem',
+            borderRadius: '8px',
+            transition: 'transform 0.2s',
+            '&:hover': {
+              transform: 'translateY(-5px)',
+              backgroundColor: alpha('#7925d3', 0.1)
+            }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <SchoolIcon sx={{ fontSize: 40, color: '#7925d3', mr: 2 }} />
               <div>
                 <Typography variant="h4">{totalCourses}</Typography>
-                <Typography variant="subtitle2" color="textSecondary">Matières</Typography>
+                <Typography variant="subtitle2" sx={{ color: '#a18aba' }}>Matières</Typography>
               </div>
             </Box>
           </Paper>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={statCardStyle}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <AssignmentIcon sx={{ fontSize: 40, color: theme.palette.success.main, mr: 2 }} />
+          <Paper sx={{
+            backgroundColor: alpha('#140524', 0.6),
+            color: '#ebe7ef',
+            padding: '1.5rem',
+            borderRadius: '8px',
+            transition: 'transform 0.2s',
+            '&:hover': {
+              transform: 'translateY(-5px)',
+              backgroundColor: alpha('#7925d3', 0.1)
+            }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <AssignmentIcon sx={{ fontSize: 40, color: '#7925d3', mr: 2 }} />
               <div>
                 <Typography variant="h4">{filteredData.length}</Typography>
-                <Typography variant="subtitle2" color="textSecondary">Notes Totales</Typography>
+                <Typography variant="subtitle2" sx={{ color: '#a18aba' }}>Notes Totales</Typography>
               </div>
             </Box>
           </Paper>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={statCardStyle}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <TrendingUpIcon sx={{ fontSize: 40, color: theme.palette.warning.main, mr: 2 }} />
+          <Paper sx={{
+            backgroundColor: alpha('#140524', 0.6),
+            color: '#ebe7ef',
+            padding: '1.5rem',
+            borderRadius: '8px',
+            transition: 'transform 0.2s',
+            '&:hover': {
+              transform: 'translateY(-5px)',
+              backgroundColor: alpha('#7925d3', 0.1)
+            }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <TrendingUpIcon sx={{ fontSize: 40, color: '#7925d3', mr: 2 }} />
               <div>
                 <Typography variant="h4">{averageGrade}%</Typography>
-                <Typography variant="subtitle2" color="textSecondary">Moyenne Générale</Typography>
+                <Typography variant="subtitle2" sx={{ color: '#a18aba' }}>Moyenne Générale</Typography>
               </div>
             </Box>
           </Paper>
         </Grid>
       </Grid>
 
-      {/* Graphiques */}
+      {/* Charts */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+          <Paper sx={{
+            padding: '1.5rem',
+            backgroundColor: alpha('#140524', 0.6),
+            borderRadius: '8px',
+            '& .recharts-text': {
+              fill: '#ebe7ef'
+            }
+          }}>
             <Typography variant="h6" gutterBottom>
               Moyenne par Matière
             </Typography>
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 2, borderColor: alpha('#7925d3', 0.3) }} />
             <Box sx={{ height: 400 }}>
               <ResponsiveContainer>
                 <BarChart data={averageData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="course" />
-                  <YAxis domain={[0, 100]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={alpha('#7925d3', 0.2)} />
+                  <XAxis dataKey="course" stroke="#ebe7ef" />
+                  <YAxis domain={[0, 100]} stroke="#ebe7ef" />
                   <Tooltip 
-                    formatter={(value) => [`${value}%`, 'Moyenne']}
-                    contentStyle={{ backgroundColor: theme.palette.background.paper }}
+                    contentStyle={{ 
+                      backgroundColor: '#140524',
+                      border: `1px solid ${alpha('#7925d3', 0.3)}`,
+                      color: '#ebe7ef'
+                    }}
                   />
                   <Legend />
-                  <Bar dataKey="average" fill={theme.palette.primary.main} />
+                  <Bar dataKey="average" fill="#7925d3" />
                 </BarChart>
               </ResponsiveContainer>
             </Box>
@@ -223,11 +276,18 @@ const DashboardComponent = ({ data }) => {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+          <Paper sx={{
+            padding: '1.5rem',
+            backgroundColor: alpha('#140524', 0.6),
+            borderRadius: '8px',
+            '& .recharts-text': {
+              fill: '#ebe7ef'
+            }
+          }}>
             <Typography variant="h6" gutterBottom>
               Distribution des Notes
             </Typography>
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 2, borderColor: alpha('#7925d3', 0.3) }} />
             <Box sx={{ height: 400 }}>
               <ResponsiveContainer>
                 <PieChart>
@@ -235,21 +295,22 @@ const DashboardComponent = ({ data }) => {
                     data={gradeDistribution}
                     cx="50%"
                     cy="50%"
-                    labelLine={true}
+                    labelLine={{ stroke: '#ebe7ef' }}
                     label={({ range, percentage }) => `${range} (${percentage}%)`}
                     outerRadius={130}
-                    fill="#8884d8"
+                    fill="#7925d3"
                     dataKey="count"
                   >
                     {gradeDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip 
-                    formatter={(value, name, props) => [
-                      `${value} étudiants (${props.payload.percentage}%)`,
-                      'Nombre d\'étudiants'
-                    ]}
+                    contentStyle={{ 
+                      backgroundColor: '#140524',
+                      border: `1px solid ${alpha('#7925d3', 0.3)}`,
+                      color: '#ebe7ef'
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -258,35 +319,45 @@ const DashboardComponent = ({ data }) => {
         </Grid>
 
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 3 }}>
+          <Paper sx={{
+            padding: '1.5rem',
+            backgroundColor: alpha('#140524', 0.6),
+            borderRadius: '8px',
+            '& .recharts-text': {
+              fill: '#ebe7ef'
+            }
+          }}>
             <Typography variant="h6" gutterBottom>
               Évolution des Notes dans le Temps
             </Typography>
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 2, borderColor: alpha('#7925d3', 0.3) }} />
             <Box sx={{ height: 400 }}>
               <ResponsiveContainer>
                 <LineChart data={filteredData}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={alpha('#7925d3', 0.2)} />
                   <XAxis 
                     dataKey="date" 
-                    type="category"
+                    stroke="#ebe7ef"
                     tick={{ angle: -45 }}
                     textAnchor="end"
                     height={70}
                   />
-                  <YAxis domain={[0, 100]} />
+                  <YAxis domain={[0, 100]} stroke="#ebe7ef" />
                   <Tooltip
-                    formatter={(value) => [`${value}%`, 'Note']}
-                    contentStyle={{ backgroundColor: theme.palette.background.paper }}
+                    contentStyle={{ 
+                      backgroundColor: '#140524',
+                      border: `1px solid ${alpha('#7925d3', 0.3)}`,
+                      color: '#ebe7ef'
+                    }}
                   />
                   <Legend />
                   <Line 
                     type="monotone" 
                     dataKey="grade" 
-                    stroke={theme.palette.primary.main}
+                    stroke="#7925d3"
                     strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 8 }}
+                    dot={{ r: 4, fill: '#7925d3' }}
+                    activeDot={{ r: 8, fill: '#8935e3' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
