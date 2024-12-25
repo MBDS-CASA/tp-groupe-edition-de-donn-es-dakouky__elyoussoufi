@@ -426,7 +426,7 @@ const NotesComponent = ({ data: initialData, students = [], courses = [] }) => {
             Annuler
           </Button>
           <Button onClick={handleSaveNote} color="primary">
-            Sauvegarder
+            Sauvegarde
           </Button>
         </DialogActions>
       </Dialog>
