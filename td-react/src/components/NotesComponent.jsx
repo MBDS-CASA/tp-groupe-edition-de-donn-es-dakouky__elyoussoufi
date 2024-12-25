@@ -1,132 +1,3 @@
-/* import { useState } from 'react';
-import { Styles } from '../styles';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TextField,
-  TablePagination,
-  Box
-} from '@mui/material';
-
-const NotesComponent = ({ data }) => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  // États pour les filtres par colonne
-  const [nameFilter, setNameFilter] = useState('');
-  const [courseFilter, setCourseFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-  const [gradeFilter, setGradeFilter] = useState('');
-
-  if (!data || !Array.isArray(data)) {
-    return <Box>Aucune donnée disponible</Box>;
-  }
-
-  // Filtrer les données en fonction des champs de recherche
-  const filteredData = data.filter((row) => {
-    const fullName = `${row.student.firstname} ${row.student.lastname}`.toLowerCase();
-    const course = row.course.toLowerCase();
-    const date = row.date.toLowerCase();
-    const grade = row.grade.toString().toLowerCase();
-
-    return (
-      fullName.includes(nameFilter.toLowerCase()) &&
-      course.includes(courseFilter.toLowerCase()) &&
-      date.includes(dateFilter.toLowerCase()) &&
-      grade.includes(gradeFilter.toLowerCase())
-    );
-  });
-
-  return (
-    <Box sx={{ width: '100%' }}>
-      <TableContainer component={Paper} sx={Styles.table}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  label="Nom"
-                  size="small"
-                  value={nameFilter}
-                  onChange={(e) => setNameFilter(e.target.value)}
-                />
-              </TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  label="Cours"
-                  size="small"
-                  value={courseFilter}
-                  onChange={(e) => setCourseFilter(e.target.value)}
-                />
-              </TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  label="Date"
-                  size="small"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                />
-              </TableCell>
-              <TableCell>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  label="Note"
-                  size="small"
-                  value={gradeFilter}
-                  onChange={(e) => setGradeFilter(e.target.value)}
-                />
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Nom</TableCell>
-              <TableCell>Cours</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Note</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => (
-                <TableRow key={row.unique_id}>
-                  <TableCell>{`${row.student.firstname} ${row.student.lastname}`}</TableCell>
-                  <TableCell>{row.course}</TableCell>
-                  <TableCell>{row.date}</TableCell>
-                  <TableCell>{row.grade}</TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={filteredData.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={(e, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-        />
-      </TableContainer>
-    </Box>
-  );
-};
-
-export default NotesComponent; */
 import { useState, useEffect } from 'react';
 import {
   Box,
@@ -155,6 +26,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
+import FileDownloadIcon from '@mui/icons-material/CloudDownload';
 
 const NotesComponent = ({ data: initialData, students = [], courses = [] }) => {
   // State management
@@ -346,6 +218,31 @@ const NotesComponent = ({ data: initialData, students = [], courses = [] }) => {
     setMemoryData(memoryData.filter((note) => note.unique_id !== unique_id));
   };
 
+  const handleExportCSV = () => {
+    const csvRows = [];
+    const headers = ['Nom', 'Cours', 'Date', 'Note'];
+    csvRows.push(headers.join(','));
+
+    filteredData.forEach((row) => {
+      const studentName = `${row.student.firstname} ${row.student.lastname}`;
+      const rowData = [
+        studentName,
+        row.course,
+        row.date,
+        row.grade
+      ];
+      csvRows.push(rowData.join(','));
+    });
+
+    const csvData = csvRows.join('\n');
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'notes.csv';
+    link.click();
+  };
+
   // Pagination
   const pageCount = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice(
@@ -363,6 +260,14 @@ const NotesComponent = ({ data: initialData, students = [], courses = [] }) => {
           sx={customStyles.addButton}
         >
           Ajouter une note
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<SearchIcon />}
+          onClick={handleExportCSV}
+          sx={customStyles.addButton}
+        >
+          Exporter en CSV
         </Button>
       </Box>
 
@@ -414,19 +319,28 @@ const NotesComponent = ({ data: initialData, students = [], courses = [] }) => {
                   sx={customStyles.textField}
                 />
               </TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleExportCSV}
+                  sx={customStyles.addButton}
+                  startIcon={<FileDownloadIcon />}
+                >
+                  Exporter
+                </Button>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedData.map((row) => (
               <TableRow key={row.unique_id}>
-                <TableCell>{`${row.student.firstname} ${row.student.lastname}`}</TableCell>
+                <TableCell>{row.student.firstname} {row.student.lastname}</TableCell>
                 <TableCell>{row.course}</TableCell>
                 <TableCell>{row.date}</TableCell>
                 <TableCell>{row.grade}</TableCell>
                 <TableCell>
                   <IconButton
-                    size="small"
                     onClick={() => {
                       setCurrentNote({
                         student_id: row.student.id,
@@ -442,7 +356,6 @@ const NotesComponent = ({ data: initialData, students = [], courses = [] }) => {
                     <EditIcon />
                   </IconButton>
                   <IconButton
-                    size="small"
                     onClick={() => handleDeleteNote(row.unique_id)}
                     sx={customStyles.iconButton}
                   >
@@ -455,39 +368,26 @@ const NotesComponent = ({ data: initialData, students = [], courses = [] }) => {
         </Table>
       </TableContainer>
 
-      {pageCount > 1 && (
+      <Box sx={customStyles.pagination}>
         <Pagination
           count={pageCount}
           page={page}
-          onChange={(e, value) => setPage(value)}
-          sx={customStyles.pagination}
+          onChange={(_, value) => setPage(value)}
+          color="primary"
         />
-      )}
+      </Box>
 
-      <Dialog 
-        open={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false);
-          setCurrentNote({
-            student_id: '',
-            course: '',
-            date: '',
-            grade: '',
-            unique_id: null
-          });
-        }}
-        sx={customStyles.dialog}
-      >
-        <DialogTitle>
-          {currentNote.unique_id ? 'Modifier la note' : 'Ajouter une note'}
-        </DialogTitle>
+      {/* Dialog for editing or adding a note */}
+      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} sx={customStyles.dialog}>
+        <DialogTitle>Ajouter / Modifier une note</DialogTitle>
         <DialogContent>
-          <FormControl fullWidth sx={{ ...customStyles.formControl, mb: 2, mt: 2 }}>
-            <InputLabel>Élève</InputLabel>
+          <FormControl fullWidth sx={customStyles.formControl}>
+            <InputLabel id="student-select-label">Étudiant</InputLabel>
             <Select
+              labelId="student-select-label"
               value={currentNote.student_id}
               onChange={(e) => setCurrentNote({ ...currentNote, student_id: e.target.value })}
-              label="Élève"
+              label="Étudiant"
             >
               {students.map((student) => (
                 <MenuItem key={student.id} value={student.id}>
@@ -496,66 +396,37 @@ const NotesComponent = ({ data: initialData, students = [], courses = [] }) => {
               ))}
             </Select>
           </FormControl>
-
-          <FormControl fullWidth sx={{ ...customStyles.formControl, mb: 2 }}>
-            <InputLabel>Cours</InputLabel>
-            <Select
-              value={currentNote.course}
-              onChange={(e) => setCurrentNote({ ...currentNote, course: e.target.value })}
-              label="Cours"
-            >
-              {courses.map((course) => (
-                <MenuItem key={course} value={course}>
-                  {course}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
           <TextField
             fullWidth
+            label="Cours"
             variant="outlined"
+            value={currentNote.course}
+            onChange={(e) => setCurrentNote({ ...currentNote, course: e.target.value })}
+            sx={customStyles.textField}
+          />
+          <TextField
+            fullWidth
             label="Date"
-            type="date"
+            variant="outlined"
             value={currentNote.date}
             onChange={(e) => setCurrentNote({ ...currentNote, date: e.target.value })}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ ...customStyles.textField, mb: 2 }}
+            sx={customStyles.textField}
           />
-
           <TextField
             fullWidth
-            variant="outlined"
             label="Note"
-            type="number"
+            variant="outlined"
             value={currentNote.grade}
             onChange={(e) => setCurrentNote({ ...currentNote, grade: e.target.value })}
             sx={customStyles.textField}
           />
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => {
-              setIsDialogOpen(false);
-              setCurrentNote({
-                student_id: '',
-                course: '',
-                date: '',
-                grade: '',
-                unique_id: null
-              });
-            }}
-            sx={{ color: '#a18aba' }}
-          >
+          <Button onClick={() => setIsDialogOpen(false)} color="secondary">
             Annuler
           </Button>
-          <Button 
-            onClick={handleSaveNote}
-            sx={customStyles.addButton}
-          >
-            {currentNote.unique_id ? 'Enregistrer' : 'Ajouter'}
+          <Button onClick={handleSaveNote} color="primary">
+            Sauvegarder
           </Button>
         </DialogActions>
       </Dialog>
