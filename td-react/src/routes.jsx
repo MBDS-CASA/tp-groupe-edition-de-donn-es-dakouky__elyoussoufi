@@ -11,11 +11,11 @@ export default function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<App />}>
-                <Route index element={<DashboardComponent data={data} />} />
-                <Route path="/dashboard" element={<DashboardComponent data={data} />} />
-                <Route path="/notes" element={<NotesComponent data={data} />} />
-                <Route path="/students" element={<StudentsComponent data={data} />} />
-                <Route path="/subjects" element={<SubjectsComponent data={data} />} />
+                <Route index element={<DashboardComponent/>} />
+                <Route path="/dashboard" element={<DashboardComponent  />} />
+                <Route path="/notes" element={<NotesComponent />} />
+                <Route path="/students" element={<StudentsComponent />} />
+                <Route path="/subjects" element={<SubjectsComponent  />} />
                 <Route path="/about" element={<AboutComponent />} />
             </Route>
         </Routes>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Box,
   List,
@@ -14,16 +15,20 @@ import {
   DialogActions,
   Pagination,
   Paper,
-  Grid,
   ButtonGroup,
   alpha,
+  Snackbar,
+  Alert,
+  CircularProgress
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import SortIcon from '@mui/icons-material/Sort';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  FileDownload as FileDownloadIcon,
+  Sort as SortIcon,
+  Search as SearchIcon,
+  Add as AddIcon
+} from '@mui/icons-material';
 
 const customStyles = {
   container: {
@@ -130,8 +135,10 @@ const customStyles = {
   },
 };
 
-const StudentsManager = ({ data }) => {
-  const [students, setStudents] = useState(data);
+const StudentsManager = () => {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({
     search: '',
@@ -140,30 +147,61 @@ const StudentsManager = ({ data }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [dialogForm, setDialogForm] = useState({
-    firstname: '',
-    lastname: ''
+    firstName: '',
+    lastName: ''
+  });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
   });
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    setStudents(data);
-  }, [data]);
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:8010/api/students');
+      setStudents(Array.isArray(response.data) ? response.data : []);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching students:', err);
+      setError('Erreur lors du chargement des étudiants');
+      setStudents([]);
+      showSnackbar('Erreur lors du chargement des étudiants', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const sortStudents = (students) => {
-    if (!filters.sortBy) return students;
-    return [...students].sort((a, b) => {
-      const valueA = a.student[filters.sortBy].toLowerCase();
-      const valueB = b.student[filters.sortBy].toLowerCase();
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const sortStudents = (studentsToSort) => {
+    if (!filters.sortBy) return studentsToSort;
+    return [...studentsToSort].sort((a, b) => {
+      const valueA = a[filters.sortBy].toLowerCase();
+      const valueB = b[filters.sortBy].toLowerCase();
       return valueA.localeCompare(valueB);
     });
   };
 
   const filteredStudents = sortStudents(
     students.filter((student) => {
-      const matchesSearch = `${student.student.firstname} ${student.student.lastname}`
-        .toLowerCase()
-        .includes(filters.search.toLowerCase());
-      return matchesSearch;
+      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+      return fullName.includes(filters.search.toLowerCase());
     })
   );
 
@@ -173,7 +211,7 @@ const StudentsManager = ({ data }) => {
   );
 
   const handleSort = (field) => {
-    setFilters((prev) => ({
+    setFilters(prev => ({
       ...prev,
       sortBy: prev.sortBy === field ? null : field
     }));
@@ -181,50 +219,65 @@ const StudentsManager = ({ data }) => {
 
   const handleOpenDialog = (student = null) => {
     setEditingStudent(student);
-    setDialogForm(student ? student.student : { firstname: '', lastname: '' });
+    setDialogForm(student ? {
+      firstName: student.firstName,
+      lastName: student.lastName
+    } : {
+      firstName: '',
+      lastName: ''
+    });
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setEditingStudent(null);
-    setDialogForm({ firstname: '', lastname: '' });
+    setDialogForm({ firstName: '', lastName: '' });
   };
 
-  const handleSubmit = () => {
-    if (editingStudent) {
-      setStudents((prev) =>
-        prev.map((s) =>
-          s.unique_id === editingStudent.unique_id
-            ? { ...s, student: { ...dialogForm } }
-            : s
-        )
-      );
-    } else {
-      setStudents((prev) => [
-        ...prev,
-        {
-          unique_id: Math.random().toString(36).substr(2, 9),
-          student: { ...dialogForm }
-        }
-      ]);
+  const handleSubmit = async () => {
+    try {
+      console.log('Dialog Form:', dialogForm); // Log pour vérifier le formulaire
+      console.log('Editing Student ID:', editingStudent ? editingStudent._id : 'None'); // Log pour vérifier l'ID
+      
+      if (editingStudent) {
+        await axios.put(`http://localhost:8010/api/students/${editingStudent._id}`, dialogForm);
+        showSnackbar('Étudiant mis à jour avec succès');
+      } else {
+        await axios.post('http://localhost:8010/api/students', dialogForm);
+        showSnackbar('Étudiant ajouté avec succès');
+      }
+      fetchStudents();
+      handleCloseDialog();
+    } catch (err) {
+      console.error('Error saving student:', err);
+      showSnackbar('Erreur lors de l\'opération', 'error');
     }
-    handleCloseDialog();
   };
+  
 
-  const handleDelete = (id) => {
-    setStudents((prev) => prev.filter((student) => student.unique_id !== id));
+  const handleDelete = async (id) => {
+    try {
+      console.log('Deleting student with ID:', id); // Log pour vérifier l'ID
+      await axios.delete(`http://localhost:8010/api/students/${id}`);
+      showSnackbar('Étudiant supprimé avec succès');
+      fetchStudents();
+    } catch (err) {
+      console.error('Error deleting student:', err);
+      showSnackbar('Erreur lors de la suppression', 'error');
+    }
   };
+  
 
   const exportToCSV = () => {
     const csvContent = [
       ['Prénom', 'Nom'],
-      ...filteredStudents.map((student) => [
-        student.student.firstname,
-        student.student.lastname
+      ...filteredStudents.map(student => [
+        student.firstName,
+        student.lastName
       ])
     ]
-      .map((row) => row.join(','))
+      .map(row => row.join(','))
       .join('\n');
   
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -237,6 +290,39 @@ const StudentsManager = ({ data }) => {
     document.body.removeChild(link);
   };
 
+  if (loading) {
+    return (
+      <Box sx={{
+        ...customStyles.container,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '200px'
+      }}>
+        <CircularProgress sx={{ color: '#7925d3' }} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{
+        ...customStyles.container,
+        textAlign: 'center',
+        color: '#ebe7ef'
+      }}>
+        <p>{error}</p>
+        <Button
+          variant="contained"
+          onClick={fetchStudents}
+          sx={customStyles.button}
+        >
+          Réessayer
+        </Button>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={customStyles.container}>
       <Box sx={customStyles.searchBar}>
@@ -248,9 +334,7 @@ const StudentsManager = ({ data }) => {
           InputProps={{
             startAdornment: <SearchIcon sx={{ color: '#a18aba', mr: 1 }} />,
           }}
-          onChange={(e) =>
-            setFilters((prev) => ({ ...prev, search: e.target.value }))
-          }
+          onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
           sx={customStyles.textField}
         />
         <Button
@@ -276,10 +360,10 @@ const StudentsManager = ({ data }) => {
           <Button
             variant="outlined"
             startIcon={<SortIcon />}
-            onClick={() => handleSort('firstname')}
+            onClick={() => handleSort('firstName')}
             sx={{
               ...customStyles.outlinedButton,
-              ...(filters.sortBy === 'firstname' && { backgroundColor: '#7925d3' }),
+              ...(filters.sortBy === 'firstName' && { backgroundColor: '#7925d3' }),
             }}
           >
             Trier par prénom
@@ -287,10 +371,10 @@ const StudentsManager = ({ data }) => {
           <Button
             variant="outlined"
             startIcon={<SortIcon />}
-            onClick={() => handleSort('lastname')}
+            onClick={() => handleSort('lastName')}
             sx={{
               ...customStyles.outlinedButton,
-              ...(filters.sortBy === 'lastname' && { backgroundColor: '#7925d3' }),
+              ...(filters.sortBy === 'lastName' && { backgroundColor: '#7925d3' }),
             }}
           >
             Trier par nom
@@ -302,10 +386,10 @@ const StudentsManager = ({ data }) => {
         <List>
           {paginatedStudents.length > 0 ? (
             paginatedStudents.map((student) => (
-              <ListItem key={student.unique_id}>
+              <ListItem key={student._id}>
                 <ListItemText
-                  primary={`${student.student.firstname} ${student.student.lastname}`}
-                  secondary={`ID: ${student.unique_id}`}
+                  primary={`${student.firstName} ${student.lastName}`}
+                  secondary={`ID: ${student._id}`}
                 />
                 <ListItemSecondaryAction>
                   <IconButton
@@ -317,7 +401,7 @@ const StudentsManager = ({ data }) => {
                   </IconButton>
                   <IconButton
                     edge="end"
-                    onClick={() => handleDelete(student.unique_id)}
+                    onClick={() => handleDelete(student._id)}
                     sx={customStyles.iconButton}
                   >
                     <DeleteIcon />
@@ -346,55 +430,51 @@ const StudentsManager = ({ data }) => {
       </Box>
 
       <Dialog open={openDialog} onClose={handleCloseDialog} sx={customStyles.dialog}>
-        <DialogTitle>
-          {editingStudent ? 'Modifier un étudiant' : 'Ajouter un étudiant'}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Prénom"
-            fullWidth
-            variant="outlined"
-            value={dialogForm.firstname}
-            onChange={(e) =>
-              setDialogForm((prev) => ({
-                ...prev,
-                firstname: e.target.value
-              }))
-            }
-            sx={customStyles.textField}
-          />
-          <TextField
-            margin="dense"
-            label="Nom"
-            fullWidth
-            variant="outlined"
-            value={dialogForm.lastname}
-            onChange={(e) =>
-              setDialogForm((prev) => ({
-                ...prev,
-                lastname: e.target.value
-              }))
-            }
-            sx={customStyles.textField}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseDialog}
-            sx={{ color: '#a18aba' }}
-          >
-            Annuler
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            sx={customStyles.button}
-          >
-            {editingStudent ? 'Mettre à jour' : 'Ajouter'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+  <DialogTitle>
+    {editingStudent ? 'Modifier un étudiant' : 'Ajouter un étudiant'}
+  </DialogTitle>
+  <DialogContent>
+    <TextField
+      autoFocus
+      margin="dense"
+      label="Prénom"
+      fullWidth
+      variant="outlined"
+      value={dialogForm.firstName}
+      onChange={(e) => setDialogForm(prev => ({ ...prev, firstName: e.target.value }))}
+      sx={customStyles.textField}
+    />
+    <TextField
+      margin="dense"
+      label="Nom"
+      fullWidth
+      variant="outlined"
+      value={dialogForm.lastName}
+      onChange={(e) => setDialogForm(prev => ({ ...prev, lastName: e.target.value }))}
+      sx={customStyles.textField}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseDialog} color="primary" sx={customStyles.button}>
+      Annuler
+    </Button>
+    <Button onClick={handleSubmit} color="primary" sx={customStyles.button}>
+      {editingStudent ? 'Mettre à jour' : 'Ajouter'}
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
