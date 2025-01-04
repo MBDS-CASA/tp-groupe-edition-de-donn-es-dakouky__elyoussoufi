@@ -4,7 +4,7 @@ Toutes les tâches de ce projet ont été réalisées avec succès. Le projet a 
 
 ## Liens Importants
 - **Backend GitHub Repository** : [appbackendreactmbds](https://github.com/YounesseElYoussoufi/appbackendreactmbds)  
-- **Frontend Repository** : *(ajouter le lien ici si applicable)*  
+- **Frontend Repository** : [frontend](https://github.com/MBDS-CASA/tp-groupe-edition-de-donn-es-dakouky__elyoussoufi)  
 
 ---
 
