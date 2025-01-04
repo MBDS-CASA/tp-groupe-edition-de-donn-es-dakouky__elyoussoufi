@@ -1,51 +1,65 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/PPqed8f9)
+# Projet Réalisé : Gestion des Étudiants, Cours et Notes
+
+Toutes les tâches de ce projet ont été réalisées avec succès. Le projet a été conçu et développé par **El Mestapha Dakouky** et **Younesse El Youssoufi**.
+
+## Liens Importants
+- **Backend GitHub Repository** : [appbackendreactmbds](https://github.com/YounesseElYoussoufi/appbackendreactmbds)  
+- **Frontend Repository** : *(ajouter le lien ici si applicable)*  
+
+---
+
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/PPqed8f9)  
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=17596755&assignment_repo_type=AssignmentRepo)
-# Partie 0 : Configuration
-## Mise en place de la base du code
-- Choisir un de vos projets (cf. TDs précédents) comme base de code
-- Une fois sélectionné, copier les fichiers du projet React (sans le cache .git ou le README du précédent TD) et coller les dans ce dossier
-  > Attention, faire en sorte que vos fichiers soient à la racine de ce repository
-- S'assurer que le projet fonctionne correctement
-  > Vous pouvez reprendre des fonctionnalités intéressantes dans chacun de vos projets
 
-## Renseigner les membres du groupe
-- Ajouter un fichier CONTRIBUTORS.md à la racine du dossier, puis y ajouter une section Contributors dans laquelle vous spécifierez le nom des membres du groupe.
-  > Utiliser les bullets points afin de renseigner un étudiant par ligne, l'ordre d'apparition des noms n'a pas d'importance
+---
 
-## Faire un premier pull request
-- Commiter et pusher les derniers changements
-- Faire une Pull Request (PR) et demander aux autres membres de réviser, valider puis merger
-- Les autres membres du groupe pull le repository
+## Partie 0 : Configuration
 
-# Partie 1: Edition de données 
-Dans cette section, vous allez ajouter des opérations d'éditions sur les données de votre application. Plus particulièrement, vous allez ajouter, éditer et supprimer des données. 
-## Fonctionnalités obligatoires
-- Ajouter/Editer/Supprimer un étudiant
-- Ajouter/Editer/Supprimer un cours
-- Ajouter/Editer/Supprimer une note
+### Mise en place de la base du code
+- Les fichiers du projet React ont été copiés à la racine de ce dépôt.
+- Le projet a été configuré et vérifié pour un bon fonctionnement.
 
-## Bonus
-> Plus vous en faites, plus vous gagnez des points bonus :)
-- Module statistiques (notes moyennes, nombre d'étudiants, moyennes par cours, classement des étudiants, ...)
-- Télécharger les données en csv
-- Contrôle de sécurité (inventer une règle quelconque pour que toute le monde ne puisse pas éditer certaines données par exemple)
+### Membres du Groupe
+- **El Mestapha Dakouky**  
+- **Younesse El Youssoufi**
 
-## Gestion des issues
-> Préfixez le nom de vos issues par OBL - [Title] pour les tâches obligatoires et par OPT - [Title] pour les tâches optionnelles
+Un fichier `CONTRIBUTORS.md` a été ajouté à la racine pour lister les membres du groupe.
 
-- Etape 0 : Créer des issues dans votre repository Github correspondant aux différentes tâches à effectuer
-- Etape 1 : Repartir les actions entre les différents membres du groupe, c'est-à-dire assigner chaque issue à un des membres du groupe
+### Pull Requests
+Toutes les modifications ont été soumises via des PRs, révisées, validées et fusionnées par les membres du groupe.
 
-## Mise en place d'une convention pour le nommage des fichiers/dossiers, variables etc...
-- Etablir les conventions de nommages, styles et mécanismes souhaités pour la gestion des formulaires
-> Bien s'assurer que les conventions de nommages sont respectées lors de la révision des PRs
- 
-## Mécanisme de gestion d'issues
-> Chaque membre du groupe répète l'ensemble de ces actions pour chaque issue qui lui est affecté
-1. Un créer une branche à partir de la page de détail de l'issue
-2. Cloner la branche sur son ordinateur local
-3. Développer la fonctionnalité liée à l'issue
-4. Faire une PR en ajoutant les autres membres du groupe en reviewers
-5. Une fois la PR validée, un des membres du groupe merge la branche dans
-6. Tous les autres membres du groupe s'alignent sur master
- 
+---
+
+## Partie 1: Édition de Données
+
+### Fonctionnalités Implémentées
+- **Étudiants** : Ajouter, éditer, supprimer un étudiant.
+- **Cours** : Ajouter, éditer, supprimer un cours.
+- **Notes** : Ajouter, éditer, supprimer une note.
+
+### Bonus Réalisés
+- Statistiques : Calcul des moyennes des notes, classement des étudiants, etc.
+- Export des données en CSV.
+- Contrôle de sécurité : Ajout de règles pour limiter les accès à l'édition de données sensibles.
+
+---
+
+## Gestion des Issues
+
+Les issues ont été créées et gérées conformément aux étapes décrites :
+1. Création des issues avec des préfixes :
+   - OBL : Obligatoires
+   - OPT : Optionnelles
+2. Assignation des tâches aux membres du groupe.
+3. Développement et soumission des PRs pour validation.
+
+---
+
+## Conventions et Mécanismes
+
+- Conventions de nommage adoptées et appliquées à toutes les branches.
+- Gestion des formulaires : Standardisation des styles et validations.
+
+---
+
+Ce projet est désormais complet et fonctionnel. 🚀
