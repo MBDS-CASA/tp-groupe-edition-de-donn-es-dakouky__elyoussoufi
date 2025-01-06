@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Box, Typography, Paper, Grid, Divider, alpha, useTheme } from '@mui/material';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Box, Typography, Paper, Grid, Divider, alpha, useTheme, Autocomplete, TextField } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer 
@@ -8,79 +8,115 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import PeopleIcon from '@mui/icons-material/People';
 import SchoolIcon from '@mui/icons-material/School';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import { Autocomplete, TextField } from '@mui/material';
 
-const DashboardComponent = ({ data }) => {
+const DashboardComponent = () => {
   const theme = useTheme();
+  const [grades, setGrades] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Obtenir la liste unique des étudiants
-  const students = useMemo(() => {
-    const uniqueStudents = new Map();
-    data.forEach(item => {
-      const studentId = item.student.id;
-      if (!uniqueStudents.has(studentId)) {
-        uniqueStudents.set(studentId, {
-          id: studentId,
-          fullName: `${item.student.firstname} ${item.student.lastname}`,
-          ...item.student
-        });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [gradesRes, studentsRes, coursesRes] = await Promise.all([
+          fetch('http://localhost:8010/api/grades'),
+          fetch('http://localhost:8010/api/students'),
+          fetch('http://localhost:8010/api/courses')
+        ]);
+
+        const gradesData = await gradesRes.json();
+        const studentsData = await studentsRes.json();
+        const coursesData = await coursesRes.json();
+
+        setGrades(gradesData);
+        setStudents(studentsData);
+        setCourses(coursesData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Filtered data based on selected student
+  const filteredGrades = useMemo(() => {
+    if (!selectedStudent) return grades;
+    return grades.filter(grade => grade.student._id === selectedStudent._id);
+  }, [grades, selectedStudent]);
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const totalStudents = selectedStudent ? 1 : new Set(grades.map(g => g.student._id)).size;
+    const totalCourses = new Set(grades.map(g => g.course._id)).size;
+    const averageGrade = Math.round(
+      filteredGrades.reduce((acc, curr) => acc + curr.grade, 0) / filteredGrades.length
+    );
+
+    return {
+      totalStudents,
+      totalCourses,
+      totalGrades: filteredGrades.length,
+      averageGrade: isNaN(averageGrade) ? 0 : averageGrade
+    };
+  }, [filteredGrades, grades, selectedStudent]);
+
+  // Calculate course averages
+  const courseAverages = useMemo(() => {
+    const averages = {};
+    filteredGrades.forEach(grade => {
+      if (!averages[grade.course.name]) {
+        averages[grade.course.name] = { total: grade.grade, count: 1 };
+      } else {
+        averages[grade.course.name].total += grade.grade;
+        averages[grade.course.name].count += 1;
       }
     });
-    return Array.from(uniqueStudents.values());
-  }, [data]);
 
-  // Filtrer les données en fonction de l'étudiant sélectionné
-  const filteredData = useMemo(() => {
-    if (!selectedStudent) return data;
-    return data.filter(item => item.student.id === selectedStudent.id);
-  }, [data, selectedStudent]);
+    return Object.entries(averages).map(([course, data]) => ({
+      course,
+      average: Math.round(data.total / data.count)
+    }));
+  }, [filteredGrades]);
 
-  // Statistiques générales
-  const totalStudents = selectedStudent ? 1 : new Set(data.map(item => item.student.id)).size;
-  const totalCourses = new Set(filteredData.map(item => item.course)).size;
-  const averageGrade = Math.round(filteredData.reduce((acc, curr) => acc + curr.grade, 0) / filteredData.length);
+  // Calculate grade distribution
+  const gradeDistribution = useMemo(() => {
+    const ranges = {
+      'Excellent (90-100)': 0,
+      'Très Bien (80-89)': 0,
+      'Bien (70-79)': 0,
+      'Passable (60-69)': 0,
+      'Insuffisant (<60)': 0
+    };
 
-  // Calculer la moyenne des notes par matière
-  const courseAverages = filteredData.reduce((acc, curr) => {
-    if (!acc[curr.course]) {
-      acc[curr.course] = { total: curr.grade, count: 1 };
-    } else {
-      acc[curr.course].total += curr.grade;
-      acc[curr.course].count += 1;
-    }
-    return acc;
-  }, {});
+    filteredGrades.forEach(item => {
+      if (item.grade >= 90) ranges['Excellent (90-100)']++;
+      else if (item.grade >= 80) ranges['Très Bien (80-89)']++;
+      else if (item.grade >= 70) ranges['Bien (70-79)']++;
+      else if (item.grade >= 60) ranges['Passable (60-69)']++;
+      else ranges['Insuffisant (<60)']++;
+    });
 
-  const averageData = Object.entries(courseAverages).map(([course, stats]) => ({
-    course,
-    average: Math.round(stats.total / stats.count)
-  }));
-
-  // Distribution des notes par tranches
-  const gradeRanges = {
-    'Excellent (90-100)': 0,
-    'Très Bien (80-89)': 0,
-    'Bien (70-79)': 0,
-    'Passable (60-69)': 0,
-    'Insuffisant (<60)': 0
-  };
-
-  filteredData.forEach(item => {
-    if (item.grade >= 90) gradeRanges['Excellent (90-100)']++;
-    else if (item.grade >= 80) gradeRanges['Très Bien (80-89)']++;
-    else if (item.grade >= 70) gradeRanges['Bien (70-79)']++;
-    else if (item.grade >= 60) gradeRanges['Passable (60-69)']++;
-    else gradeRanges['Insuffisant (<60)']++;
-  });
-
-  const gradeDistribution = Object.entries(gradeRanges).map(([range, count]) => ({
-    range,
-    count,
-    percentage: filteredData.length > 0 ? Math.round((count / filteredData.length) * 100) : 0
-  }));
+    return Object.entries(ranges).map(([range, count]) => ({
+      range,
+      count,
+      percentage: filteredGrades.length > 0 ? Math.round((count / filteredGrades.length) * 100) : 0
+    }));
+  }, [filteredGrades]);
 
   const CHART_COLORS = ['#7925d3', '#8935e3', '#9945f3', '#a855ff', '#b865ff'];
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <Typography>Chargement...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ 
@@ -104,7 +140,7 @@ const DashboardComponent = ({ data }) => {
           value={selectedStudent}
           onChange={(event, newValue) => setSelectedStudent(newValue)}
           options={students}
-          getOptionLabel={(option) => option.fullName}
+          getOptionLabel={(option) => `${option.firstName} ${option.lastName}`}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -141,7 +177,7 @@ const DashboardComponent = ({ data }) => {
       {/* Dashboard Title */}
       <Typography variant="h5" sx={{ mb: 3, color: '#ebe7ef' }}>
         {selectedStudent 
-          ? `Tableau de bord de ${selectedStudent.fullName}`
+          ? `Tableau de bord de ${selectedStudent.firstName} ${selectedStudent.lastName}`
           : 'Tableau de bord général'
         }
       </Typography>
@@ -163,7 +199,7 @@ const DashboardComponent = ({ data }) => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <PeopleIcon sx={{ fontSize: 40, color: '#7925d3', mr: 2 }} />
               <div>
-                <Typography variant="h4">{totalStudents}</Typography>
+                <Typography variant="h4">{stats.totalStudents}</Typography>
                 <Typography variant="subtitle2" sx={{ color: '#a18aba' }}>
                   {selectedStudent ? 'Étudiant' : 'Étudiants'}
                 </Typography>
@@ -187,7 +223,7 @@ const DashboardComponent = ({ data }) => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <SchoolIcon sx={{ fontSize: 40, color: '#7925d3', mr: 2 }} />
               <div>
-                <Typography variant="h4">{totalCourses}</Typography>
+                <Typography variant="h4">{stats.totalCourses}</Typography>
                 <Typography variant="subtitle2" sx={{ color: '#a18aba' }}>Matières</Typography>
               </div>
             </Box>
@@ -209,7 +245,7 @@ const DashboardComponent = ({ data }) => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <AssignmentIcon sx={{ fontSize: 40, color: '#7925d3', mr: 2 }} />
               <div>
-                <Typography variant="h4">{filteredData.length}</Typography>
+                <Typography variant="h4">{stats.totalGrades}</Typography>
                 <Typography variant="subtitle2" sx={{ color: '#a18aba' }}>Notes Totales</Typography>
               </div>
             </Box>
@@ -231,7 +267,7 @@ const DashboardComponent = ({ data }) => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <TrendingUpIcon sx={{ fontSize: 40, color: '#7925d3', mr: 2 }} />
               <div>
-                <Typography variant="h4">{averageGrade}%</Typography>
+                <Typography variant="h4">{stats.averageGrade}%</Typography>
                 <Typography variant="subtitle2" sx={{ color: '#a18aba' }}>Moyenne Générale</Typography>
               </div>
             </Box>
@@ -256,7 +292,7 @@ const DashboardComponent = ({ data }) => {
             <Divider sx={{ mb: 2, borderColor: alpha('#7925d3', 0.3) }} />
             <Box sx={{ height: 400 }}>
               <ResponsiveContainer>
-                <BarChart data={averageData}>
+                <BarChart data={courseAverages}>
                   <CartesianGrid strokeDasharray="3 3" stroke={alpha('#7925d3', 0.2)} />
                   <XAxis dataKey="course" stroke="#ebe7ef" />
                   <YAxis domain={[0, 100]} stroke="#ebe7ef" />
@@ -333,7 +369,7 @@ const DashboardComponent = ({ data }) => {
             <Divider sx={{ mb: 2, borderColor: alpha('#7925d3', 0.3) }} />
             <Box sx={{ height: 400 }}>
               <ResponsiveContainer>
-                <LineChart data={filteredData}>
+                <LineChart data={filteredGrades}>
                   <CartesianGrid strokeDasharray="3 3" stroke={alpha('#7925d3', 0.2)} />
                   <XAxis 
                     dataKey="date" 
