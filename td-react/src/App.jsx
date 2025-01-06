@@ -1,3 +1,6 @@
+
+/* import { useState } from 'react';
+
 import { useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { 
@@ -222,5 +225,79 @@ const App = () => {
     </Box>
   );
 };
+
+export default App; */
+
+
+// src/App.js
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar/Navbar';
+import Login from './components/Auth/Login';
+import Dashboard from './components/DashboardComponemnt';
+import EmailVerification from './components/Auth/EmailVerification';
+import './App.css';
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getUser = () => {
+      fetch("http://localhost:8010/auth/login/success", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Credentials": true,
+        },
+      })
+        .then((response) => {
+          if (response.status === 200) return response.json();
+          throw new Error("Authentication failed!");
+        })
+        .then((resObject) => {
+          setUser(resObject.user);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoading(false);
+        });
+    };
+    getUser();
+  }, []);
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  return (
+    <BrowserRouter>
+      <div>
+        <Navbar user={user} />
+        <Routes>
+          <Route 
+            path="/" 
+            element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/login" 
+            element={user ? <Navigate to="/" /> : <Login />} 
+          />
+          <Route 
+            path="/dashboard" 
+            element={<Navigate to="/" replace />} 
+          />
+          <Route 
+            path="/verify-email" 
+            element={<EmailVerification />} 
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
 
 export default App;
