@@ -1,4 +1,8 @@
+
 /* import { useState } from 'react';
+
+import { useState } from 'react';
+import { useNavigate, Outlet } from 'react-router-dom';
 import { 
   Drawer, 
   IconButton, 
@@ -17,36 +21,54 @@ import {
   People as StudentsIcon,
   Book as SubjectsIcon,
   Info as AboutIcon,
-  
 } from '@mui/icons-material';
 import Dashboard from '@mui/icons-material/Dashboard';
-import DashboardComponent from './components/DashboardComponemnt';
-import AddIcon from '@mui/icons-material/Add';
 
-import NotesComponent from './components/NotesComponent';
-import StudentsComponent from './components/StudentsComponent';
-import SubjectsComponent from './components/SubjectsComponent';
-import AboutComponent from './components/AboutComponent';
-
-import data from './data.json';
 import './index.css';
 import { Styles } from './styles';
 
-
 function Header() {
   return (
-    <Box component="header" sx={Styles.header}>
+    <Box component="header" sx={{
+      width: '100%',
+      textAlign: 'center',
+      padding: { xs: '1rem', sm: '2rem' },
+      display: 'flex',
+      flexDirection: { xs: 'column', sm: 'row' },
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '1rem'
+    }}>
       <img 
         src="src/assets/logo.png" 
         alt="Logo de la formation" 
-        style={{ height: '10rem', width: '10rem', objectFit: 'cover' }} 
+        style={{ 
+          height: 'auto', 
+          width: { xs: '8rem', sm: '10rem' },
+          maxWidth: '100%',
+          objectFit: 'cover' 
+        }} 
       />
-      <Typography variant="h1" className="header-title">
-        Introduction à React
-      </Typography>
-      <Typography variant="subtitle1" className="header-subtitle">
-        A la découverte des premières notions de React
-      </Typography>
+      <Box>
+        <Typography 
+          variant="h1" 
+          className="header-title"
+          sx={{
+            fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3rem' }
+          }}
+        >
+          Introduction à React
+        </Typography>
+        <Typography 
+          variant="subtitle1" 
+          className="header-subtitle"
+          sx={{
+            fontSize: { xs: '1rem', sm: '1.2rem' }
+          }}
+        >
+          A la découverte des premières notions de React
+        </Typography>
+      </Box>
     </Box>
   );
 }
@@ -61,8 +83,15 @@ function MainContent() {
   const seconds = now.getSeconds().toString().padStart(2, '0');
 
   return (
-    <Box component="section" sx={{ textAlign: 'center', margin: '20px' }}>
-      <Typography sx={{ color: '#ebe7ef' }}>
+    <Box component="section" sx={{ 
+      width: '100%',
+      padding: { xs: '1rem', sm: '2rem' },
+      textAlign: 'center'
+    }}>
+      <Typography sx={{ 
+        color: '#ebe7ef',
+        fontSize: { xs: '0.9rem', sm: '1rem' }
+      }}>
         Bonjour, on est le {day}, {month}, {year} et il est {hours}:{minutes}:{seconds}
       </Typography>
     </Box>
@@ -70,49 +99,49 @@ function MainContent() {
 }
 
 function Footer() {
-  const year = new Date().getFullYear();
-  const nom = "Dakouky";
-  const prenom = "El Mestapha";
-  
-  return (
-    <Box 
-      component="footer" 
-      className="app-footer"
-      sx={{ 
-        textAlign: 'center', 
-        padding: '20px', 
-        position: 'fixed', 
-        bottom: 0, 
-        width: '100%'
-      }}
-    >
-      <Typography>© {year} - {prenom} {nom}, Tous droits réservés.</Typography>
-    </Box>
-  );
-}
+    const year = new Date().getFullYear();
+    const nom = "Dakouky";
+    const prenom = "El Mestapha";
+    
+    return (
+      <Box 
+        component="footer" 
+        className="app-footer"
+        sx={{ 
+          textAlign: 'center', 
+          padding: '20px', 
+          position: 'fixed', 
+          bottom: 0, 
+          width: '100%'
+        }}
+      >
+        <Typography>© {year} - {prenom} {nom}, Tous droits réservés.</Typography>
+      </Box>
+    );
+  }
 
 const App = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState('Tableau de Bord');
+  const navigate = useNavigate();
 
   const menuItems = [
-    { name: 'Tableau de Bord', icon: <Dashboard />, component: <DashboardComponent data={data} /> },
-    { name: 'Notes', icon: <NotesIcon />, component: <NotesComponent data={data} /> },
-    { name: 'Étudiants', icon: <StudentsIcon />, component: <StudentsComponent data={data} /> },
-    { name: 'Matières', icon: <SubjectsIcon />, component: <SubjectsComponent data={data} /> },
-    { name: 'À propos', icon: <AboutIcon />, component: <AboutComponent /> }
+    { name: 'Tableau de Bord', icon: <Dashboard />, path: '/dashboard' },
+    { name: 'Notes', icon: <NotesIcon />, path: '/notes' },
+    { name: 'Étudiants', icon: <StudentsIcon />, path: '/students' },
+    { name: 'Matières', icon: <SubjectsIcon />, path: '/subjects' },
+    { name: 'À propos', icon: <AboutIcon />, path: '/about' }
   ];
 
-  const handleMenuClick = (menuName) => {
+  const handleMenuClick = (menuName, path) => {
     setActiveMenu(menuName);
+    navigate(path);
     setDrawerOpen(false);
   };
 
-  const activeComponent = menuItems.find(item => item.name === activeMenu)?.component;
-
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%' }}> 
-      <AppBar position="fixed" sx={Styles.appBar}>
+      <AppBar position="fixed" sx={{ ...Styles.appBar, width: '100%' }}>
         <Toolbar>
           <IconButton
             onClick={() => setDrawerOpen(true)}
@@ -121,48 +150,75 @@ const App = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ color: '#ebe7ef' }}>
+          <Typography 
+            variant="h6" 
+            noWrap 
+            component="div" 
+            sx={{ 
+              color: '#ebe7ef',
+              fontSize: { xs: '1.1rem', sm: '1.25rem' }
+            }}
+          >
             Gestion Académique
           </Typography>
         </Toolbar>
       </AppBar>
 
       <Drawer
-      sx={Styles.drawer}
+        sx={{
+          ...Styles.drawer,
+          '& .MuiDrawer-paper': {
+            width: { xs: '240px', sm: '250px' }
+          }
+        }}
         anchor="left"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       >
-        <List sx={{ width: 250, mt: 2 }}>
+        <List sx={{ width: '100%', mt: 2 }}>
           {menuItems.map((item) => (
             <ListItem 
               button 
               key={item.name}
-              onClick={() => handleMenuClick(item.name)}
+              onClick={() => handleMenuClick(item.name, item.path)}
               selected={activeMenu === item.name}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.name} />
+              <ListItemText 
+                primary={item.name} 
+                sx={{ 
+                  '& .MuiTypography-root': { 
+                    fontSize: { xs: '0.9rem', sm: '1rem' } 
+                  } 
+                }}
+              />
             </ListItem>
           ))}
         </List>
       </Drawer>
 
-     <Box
+      <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 1,
-          width: { sm: `calc(100% - ${250}px)` },
-          ml: { sm: `${450}px` },
-          mt: '64px', 
+          width: '100%',
+          padding: { xs: '0.5rem', sm: '1rem' },
+          marginTop: '64px',
+          marginBottom: '60px',
           overflowX: 'hidden'
         }}
       >
         <Header />
         <MainContent />
-        <Box className="content-container" sx={{ flex: 1, mb: 4 }} >
-          {activeComponent}
+        <Box 
+          className="content-container" 
+          sx={{ 
+            width: '100%',
+            padding: { xs: '0.5rem', sm: '1rem' },
+            marginBottom: '1rem'
+          }}
+        >
+          <Outlet />
         </Box>
         <Footer />
       </Box>
