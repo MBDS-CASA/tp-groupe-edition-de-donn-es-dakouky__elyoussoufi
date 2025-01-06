@@ -1,23 +1,49 @@
-import { Routes, Route } from "react-router-dom";
-import App from "./App";
+//routes.jsx
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 import DashboardComponent from './components/DashboardComponemnt';
 import NotesComponent from './components/NotesComponent';
 import StudentsComponent from './components/StudentsComponent';
 import SubjectsComponent from './components/SubjectsComponent';
 import AboutComponent from './components/AboutComponent';
-import data from './data.json';
+import EmailVerification from './components/Auth/EmailVerification';
 
-export default function AppRoutes() {
-    return (
-        <Routes>
-            <Route path="/" element={<App />}>
-                <Route index element={<DashboardComponent/>} />
-                <Route path="/dashboard" element={<DashboardComponent  />} />
-                <Route path="/notes" element={<NotesComponent />} />
-                <Route path="/students" element={<StudentsComponent />} />
-                <Route path="/subjects" element={<SubjectsComponent  />} />
-                <Route path="/about" element={<AboutComponent />} />
-            </Route>
-        </Routes>
-    );
+export default function AppRoutes({ user, setUser }) {
+  return (
+    <Routes>
+      <Route 
+        path="/login" 
+        element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} 
+      />
+      <Route 
+        path="/register" 
+        element={user ? <Navigate to="/" /> : <Register />} 
+      />
+      <Route 
+        path="/verify-email" 
+        element={<EmailVerification />} 
+      />
+      <Route 
+        path="/" 
+        element={user ? <DashboardComponent user={user} /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/notes" 
+        element={user ? <NotesComponent /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/students" 
+        element={user ? <StudentsComponent /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/subjects" 
+        element={user ? <SubjectsComponent /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/about" 
+        element={user ? <AboutComponent /> : <Navigate to="/login" />} 
+      />
+    </Routes>
+  );
 }

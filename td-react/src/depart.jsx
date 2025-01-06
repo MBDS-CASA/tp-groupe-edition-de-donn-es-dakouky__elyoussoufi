@@ -1,16 +1,9 @@
+//depart.jsx
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom'; 
-import AppRoutes from './routes'; // Assurez-vous que ce fichier existe
+import App from './App';
 
 function Depart() {
-    return (
-        <>
-         <BrowserRouter>
-            <AppRoutes />
-        </BrowserRouter>
-  
-        </>  );
-       
+  return <App />;
 }
 
 export default Depart;

@@ -228,14 +228,20 @@ const App = () => {
 
 export default App; */
 
-// src/App.js
+
+
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Login from './components/Auth/Login';
-import Dashboard from './components/DashboardComponemnt';
-import EmailVerification from './components/Auth/EmailVerification';
 import Register from './components/Auth/Register';
+import DashboardComponent from './components/DashboardComponemnt';
+import NotesComponent from './components/NotesComponent';
+import StudentsComponent from './components/StudentsComponent';
+import SubjectsComponent from './components/SubjectsComponent';
+import AboutComponent from './components/AboutComponent';
+import EmailVerification from './components/Auth/EmailVerification';
+import AppRoutes from './routes';
 import './App.css';
 
 function App() {
@@ -244,7 +250,7 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    
+
     if (!token) {
       setLoading(false);
       return;
@@ -259,7 +265,7 @@ function App() {
             Accept: "application/json",
             "Content-Type": "application/json",
             "Access-Control-Allow-Credentials": true,
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}`,
           },
         });
 
@@ -271,7 +277,7 @@ function App() {
         setUser(resObject.user);
       } catch (err) {
         console.log(err);
-        localStorage.removeItem('token'); // Clear invalid token
+        localStorage.removeItem('token');
       } finally {
         setLoading(false);
       }
@@ -291,31 +297,8 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div>
-        <Navbar user={user} />
-        <Routes>
-          <Route 
-            path="/" 
-            element={user ? <Dashboard user={user} /> : <Navigate to="/login" state={{ from: '/' }} />} 
-          />
-          <Route 
-            path="/login" 
-            element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} 
-          />
-          <Route 
-            path="/register" 
-            element={user ? <Navigate to="/" /> : <Register />} 
-          />
-          <Route 
-            path="/verify-email" 
-            element={<EmailVerification />} 
-          />
-          <Route 
-            path="/dashboard" 
-            element={<Navigate to="/" replace />} 
-          />
-        </Routes>
-      </div>
+      <Navbar user={user} />
+      <AppRoutes user={user} setUser={setUser} />
     </BrowserRouter>
   );
 }

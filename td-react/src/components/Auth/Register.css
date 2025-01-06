@@ -1,118 +1,133 @@
-/* src/components/Auth/Register.css */
+
+/* Register.css */
 .register-container {
+    background: radial-gradient(#280a48, #20043d);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-color: #f5f5f5;
-    padding: 20px;
+    padding: 100px 1rem 2rem 1rem;
+    box-sizing: border-box;
   }
   
   .register-card {
-    background: white;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: rgba(20, 5, 36, 0.9);
+    padding: clamp(1.5rem, 5vw, 2rem);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
+    box-sizing: border-box;
   }
   
   .register-card h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 30px;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+  
+  .social-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
   }
   
   .register-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-  }
-  
-  .form-group {
-    position: relative;
+    gap: 1rem;
   }
   
   .form-group input {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    transition: border-color 0.3s;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #8964b0;
+    background: rgba(20, 5, 36, 0.8);
+    color: #ebe7ef;
   }
   
   .form-group input:focus {
     outline: none;
-    border-color: #4a90e2;
+    border-color: #7925d3;
   }
   
-  button {
-    background-color: #4a90e2;
-    color: white;
-    padding: 12px;
+  .register-form button {
+    background: #7925d3;
+    color: #ebe7ef;
+    padding: 1rem;
     border: none;
-    border-radius: 5px;
-    font-size: 16px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
   }
   
-  button:hover {
-    background-color: #357abd;
+  .register-form button:hover {
+    background: #8935e3;
+    transform: translateY(-2px);
   }
   
-  button:disabled {
-    background-color: #ccc;
+  .register-form button:disabled {
+    background: #8964b0;
     cursor: not-allowed;
   }
   
-  .error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
   .social-login {
-    margin-top: 30px;
+    margin-top: 2rem;
     text-align: center;
-  }
-  
-  .social-login p {
-    color: #666;
-    margin-bottom: 15px;
+    color: #8964b0;
   }
   
   .social-buttons {
     display: flex;
-    gap: 10px;
     justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
   }
   
   .social-button {
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
     text-decoration: none;
-    color: white;
-    font-weight: 500;
-    transition: opacity 0.3s;
-  }
-  
-  .social-button:hover {
-    opacity: 0.9;
+    color: #ebe7ef;
+    transition: all 0.3s ease;
   }
   
   .social-button.google {
-    background-color: #db4437;
+    background: #DB4437;
   }
   
   .social-button.github {
-    background-color: #333;
+    background: #333;
   }
   
   .social-button.linkedin {
-    background-color: #0077b5;
+    background: #0077b5;
   }
+  
+  .social-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+  }
+  
+  /* Register Responsive Styles */
+@media (max-width: 480px) {
+    .register-form {
+      gap: 0.8rem;
+    }
+  
+    .form-group input {
+      padding: 0.8rem;
+    }
+  
+    .social-buttons {
+      flex-direction: column;
+    }
+  
+    .social-button {
+      width: 100%;
+      text-align: center;
+      padding: 0.8rem;
+    }
+  }
+  
