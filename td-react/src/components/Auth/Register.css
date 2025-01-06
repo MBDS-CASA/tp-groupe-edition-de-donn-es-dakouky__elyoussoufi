@@ -1,0 +1,118 @@
+/* src/components/Auth/Register.css */
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    padding: 20px;
+  }
+  
+  .register-card {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .register-card h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  .register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-group {
+    position: relative;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #4a90e2;
+  }
+  
+  button {
+    background-color: #4a90e2;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #357abd;
+  }
+  
+  button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .social-login {
+    margin-top: 30px;
+    text-align: center;
+  }
+  
+  .social-login p {
+    color: #666;
+    margin-bottom: 15px;
+  }
+  
+  .social-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .social-button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: opacity 0.3s;
+  }
+  
+  .social-button:hover {
+    opacity: 0.9;
+  }
+  
+  .social-button.google {
+    background-color: #db4437;
+  }
+  
+  .social-button.github {
+    background-color: #333;
+  }
+  
+  .social-button.linkedin {
+    background-color: #0077b5;
+  }

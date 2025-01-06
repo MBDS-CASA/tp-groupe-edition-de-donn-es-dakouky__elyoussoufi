@@ -172,7 +172,6 @@ const App = () => {
 
 export default App; */
 
-
 // src/App.js
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -180,6 +179,7 @@ import Navbar from './components/Navbar/Navbar';
 import Login from './components/Auth/Login';
 import Dashboard from './components/DashboardComponemnt';
 import EmailVerification from './components/Auth/EmailVerification';
+import Register from './components/Auth/Register';
 import './App.css';
 
 function App() {
@@ -187,34 +187,50 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const getUser = () => {
-      fetch("http://localhost:8010/auth/login/success", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Credentials": true,
-        },
-      })
-        .then((response) => {
-          if (response.status === 200) return response.json();
-          throw new Error("Authentication failed!");
-        })
-        .then((resObject) => {
-          setUser(resObject.user);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.log(err);
-          setLoading(false);
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    const getUser = async () => {
+      try {
+        const response = await fetch("http://localhost:8010/auth/login/success", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Credentials": true,
+            "Authorization": `Bearer ${token}`
+          },
         });
+
+        if (!response.ok) {
+          throw new Error("Authentication failed!");
+        }
+
+        const resObject = await response.json();
+        setUser(resObject.user);
+      } catch (err) {
+        console.log(err);
+        localStorage.removeItem('token'); // Clear invalid token
+      } finally {
+        setLoading(false);
+      }
     };
+
     getUser();
   }, []);
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading-container">
+        <div className="loader"></div>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   return (
@@ -224,19 +240,23 @@ function App() {
         <Routes>
           <Route 
             path="/" 
-            element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} 
+            element={user ? <Dashboard user={user} /> : <Navigate to="/login" state={{ from: '/' }} />} 
           />
           <Route 
             path="/login" 
-            element={user ? <Navigate to="/" /> : <Login />} 
+            element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} 
           />
           <Route 
-            path="/dashboard" 
-            element={<Navigate to="/" replace />} 
+            path="/register" 
+            element={user ? <Navigate to="/" /> : <Register />} 
           />
           <Route 
             path="/verify-email" 
             element={<EmailVerification />} 
+          />
+          <Route 
+            path="/dashboard" 
+            element={<Navigate to="/" replace />} 
           />
         </Routes>
       </div>
