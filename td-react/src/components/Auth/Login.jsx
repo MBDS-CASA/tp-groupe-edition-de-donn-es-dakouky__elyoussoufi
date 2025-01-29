@@ -28,38 +28,42 @@ const Login = ({ setUser }) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-
+  
     try {
       const response = await fetch('http://localhost:8010/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          // Retirez 'Authorization' s'il n'est pas nécessaire pour le login
         },
-        credentials: 'include',
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
       });
-
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
       const data = await response.json();
-
-      if (response.ok) {
-        if (!data.user.isVerified) {
-          setMessage('Please verify your email before logging in.');
-        } else {
-          localStorage.setItem('token', data.token);
-          setUser(data.user);
-          const from = location.state?.from || '/';
-          navigate(from);
-        }
+      
+      if (data.user && data.token) {
+        localStorage.setItem('token', data.token);
+        setUser(data.user);
+        navigate('/');
       } else {
-        setMessage(data.message || 'Login failed');
+        setMessage('Erreur de connexion : réponse invalide du serveur');
       }
     } catch (error) {
-      setMessage('An error occurred. Please try again.');
+      console.error('Erreur de connexion:', error);
+      setMessage('Une erreur est survenue lors de la connexion. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
   };
-
+  
   const google = () => {
     window.open("http://localhost:8010/auth/google", "_self");
   };

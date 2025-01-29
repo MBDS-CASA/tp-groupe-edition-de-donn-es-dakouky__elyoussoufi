@@ -19,7 +19,9 @@ import {
   alpha,
   Snackbar,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Switch,
+  FormControlLabel
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -27,16 +29,19 @@ import {
   FileDownload as FileDownloadIcon,
   Sort as SortIcon,
   Search as SearchIcon,
-  Add as AddIcon
+  Add as AddIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon
 } from '@mui/icons-material';
 
-const customStyles = {
+const getThemeStyles = (isDarkMode) => ({
   container: {
     width: '100%',
     padding: '2rem',
-    backgroundColor: '#140524',
+    backgroundColor: isDarkMode ? '#140524' : '#ffffff',
     borderRadius: '12px',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+    transition: 'background-color 0.3s ease',
   },
   searchBar: {
     display: 'flex',
@@ -46,10 +51,10 @@ const customStyles = {
   },
   textField: {
     '& .MuiOutlinedInput-root': {
-      backgroundColor: alpha('#ffffff', 0.05),
-      color: '#ebe7ef',
+      backgroundColor: isDarkMode ? alpha('#ffffff', 0.05) : alpha('#000000', 0.05),
+      color: isDarkMode ? '#ebe7ef' : '#000000',
       '& fieldset': {
-        borderColor: alpha('#7925d3', 0.3),
+        borderColor: isDarkMode ? alpha('#7925d3', 0.3) : alpha('#7925d3', 0.5),
       },
       '&:hover fieldset': {
         borderColor: '#7925d3',
@@ -59,7 +64,7 @@ const customStyles = {
       },
     },
     '& .MuiInputLabel-root': {
-      color: '#a18aba',
+      color: isDarkMode ? '#a18aba' : '#666666',
     },
     '& .MuiInputLabel-root.Mui-focused': {
       color: '#7925d3',
@@ -67,13 +72,13 @@ const customStyles = {
   },
   button: {
     backgroundColor: '#7925d3',
-    color: '#ebe7ef',
+    color: '#ffffff',
     '&:hover': {
       backgroundColor: '#8935e3',
     },
   },
   outlinedButton: {
-    color: '#ebe7ef',
+    color: isDarkMode ? '#ebe7ef' : '#000000',
     borderColor: alpha('#7925d3', 0.3),
     '&:hover': {
       backgroundColor: alpha('#7925d3', 0.2),
@@ -82,60 +87,82 @@ const customStyles = {
     '&.active': {
       backgroundColor: '#7925d3',
       borderColor: '#7925d3',
+      color: '#ffffff',
     },
   },
   listContainer: {
-    backgroundColor: alpha('#140524', 0.6),
+    backgroundColor: isDarkMode ? alpha('#140524', 0.6) : '#ffffff',
     borderRadius: '8px',
     marginBottom: '1rem',
+    transition: 'background-color 0.3s ease',
     '& .MuiListItem-root': {
-      borderBottom: `1px solid ${alpha('#7925d3', 0.2)}`,
+      borderBottom: `1px solid ${isDarkMode ? alpha('#7925d3', 0.2) : alpha('#000000', 0.1)}`,
       '&:hover': {
-        backgroundColor: alpha('#7925d3', 0.1),
+        backgroundColor: isDarkMode ? alpha('#7925d3', 0.1) : alpha('#7925d3', 0.05),
       },
     },
     '& .MuiListItemText-primary': {
-      color: '#ebe7ef',
+      color: isDarkMode ? '#ebe7ef' : '#000000',
     },
     '& .MuiListItemText-secondary': {
-      color: '#a18aba',
+      color: isDarkMode ? '#a18aba' : '#666666',
     },
   },
   iconButton: {
-    color: '#a18aba',
+    color: isDarkMode ? '#a18aba' : '#666666',
     '&:hover': {
       backgroundColor: alpha('#7925d3', 0.2),
-      color: '#ebe7ef',
+      color: isDarkMode ? '#ebe7ef' : '#000000',
     },
   },
   dialog: {
     '& .MuiDialog-paper': {
-      backgroundColor: '#140524',
-      color: '#ebe7ef',
+      backgroundColor: isDarkMode ? '#140524' : '#ffffff',
+      color: isDarkMode ? '#ebe7ef' : '#000000',
       padding: '1rem',
     },
     '& .MuiDialogTitle-root': {
-      color: '#ebe7ef',
+      color: isDarkMode ? '#ebe7ef' : '#000000',
     },
   },
   pagination: {
     '& .MuiPaginationItem-root': {
-      color: '#ebe7ef',
+      color: isDarkMode ? '#ebe7ef' : '#000000',
       borderColor: alpha('#7925d3', 0.3),
       '&:hover': {
         backgroundColor: alpha('#7925d3', 0.2),
       },
       '&.Mui-selected': {
         backgroundColor: '#7925d3',
+        color: '#ffffff',
         '&:hover': {
           backgroundColor: '#8935e3',
         },
       },
     },
   },
-};
+  themeToggle: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '1rem',
+    color: isDarkMode ? '#ebe7ef' : '#000000',
+    '& .MuiSwitch-root': {
+      '& .MuiSwitch-switchBase.Mui-checked': {
+        color: '#7925d3',
+        '& + .MuiSwitch-track': {
+          backgroundColor: alpha('#7925d3', 0.5),
+        },
+      },
+      '& .MuiSwitch-track': {
+        backgroundColor: isDarkMode ? '#a18aba' : '#666666',
+      },
+    },
+  },
+});
 
 const StudentsManager = () => {
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const customStyles = getThemeStyles(isDarkMode);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -176,6 +203,10 @@ const StudentsManager = () => {
   useEffect(() => {
     fetchStudents();
   }, []);
+
+  const handleThemeToggle = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({
@@ -237,9 +268,6 @@ const StudentsManager = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log('Dialog Form:', dialogForm); // Log pour vérifier le formulaire
-      console.log('Editing Student ID:', editingStudent ? editingStudent._id : 'None'); // Log pour vérifier l'ID
-      
       if (editingStudent) {
         await axios.put(`http://localhost:8010/api/students/${editingStudent._id}`, dialogForm);
         showSnackbar('Étudiant mis à jour avec succès');
@@ -254,11 +282,9 @@ const StudentsManager = () => {
       showSnackbar('Erreur lors de l\'opération', 'error');
     }
   };
-  
 
   const handleDelete = async (id) => {
     try {
-      console.log('Deleting student with ID:', id); // Log pour vérifier l'ID
       await axios.delete(`http://localhost:8010/api/students/${id}`);
       showSnackbar('Étudiant supprimé avec succès');
       fetchStudents();
@@ -267,7 +293,6 @@ const StudentsManager = () => {
       showSnackbar('Erreur lors de la suppression', 'error');
     }
   };
-  
 
   const exportToCSV = () => {
     const csvContent = [
@@ -279,7 +304,7 @@ const StudentsManager = () => {
     ]
       .map(row => row.join(','))
       .join('\n');
-  
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -309,7 +334,7 @@ const StudentsManager = () => {
       <Box sx={{
         ...customStyles.container,
         textAlign: 'center',
-        color: '#ebe7ef'
+        color: isDarkMode ? '#ebe7ef' : '#000000'
       }}>
         <p>{error}</p>
         <Button
@@ -325,6 +350,20 @@ const StudentsManager = () => {
 
   return (
     <Box sx={customStyles.container}>
+      <Box sx={customStyles.themeToggle}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={isDarkMode}
+              onChange={handleThemeToggle}
+              icon={<LightModeIcon />}
+              checkedIcon={<DarkModeIcon />}
+            />
+          }
+          label={isDarkMode ? 'Mode sombre' : 'Mode clair'}
+        />
+      </Box>
+
       <Box sx={customStyles.searchBar}>
         <TextField
           fullWidth
@@ -332,7 +371,7 @@ const StudentsManager = () => {
           label="Rechercher un étudiant (nom ou prénom)"
           value={filters.search}
           InputProps={{
-            startAdornment: <SearchIcon sx={{ color: '#a18aba', mr: 1 }} />,
+            startAdornment: <SearchIcon sx={{ color: isDarkMode ? '#a18aba' : '#666666', mr: 1 }} />,
           }}
           onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
           sx={customStyles.textField}
@@ -411,72 +450,99 @@ const StudentsManager = () => {
             ))
           ) : (
             <ListItem>
-              <ListItemText
-                primary="Aucun étudiant trouvé"
-                sx={{ textAlign: 'center', color: '#a18aba' }}
-              />
-            </ListItem>
-          )}
-        </List>
-      </Paper>
+            <ListItemText
+              primary="Aucun étudiant trouvé"
+              sx={{ textAlign: 'center', color: isDarkMode ? '#a18aba' : '#666666' }}
+            />
+          </ListItem>
+        )}
+      </List>
+    </Paper>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Pagination
-          count={Math.ceil(filteredStudents.length / itemsPerPage)}
-          page={page}
-          onChange={(e, value) => setPage(value)}
-          sx={customStyles.pagination}
-        />
-      </Box>
-
-      <Dialog open={openDialog} onClose={handleCloseDialog} sx={customStyles.dialog}>
-  <DialogTitle>
-    {editingStudent ? 'Modifier un étudiant' : 'Ajouter un étudiant'}
-  </DialogTitle>
-  <DialogContent>
-    <TextField
-      autoFocus
-      margin="dense"
-      label="Prénom"
-      fullWidth
-      variant="outlined"
-      value={dialogForm.firstName}
-      onChange={(e) => setDialogForm(prev => ({ ...prev, firstName: e.target.value }))}
-      sx={customStyles.textField}
-    />
-    <TextField
-      margin="dense"
-      label="Nom"
-      fullWidth
-      variant="outlined"
-      value={dialogForm.lastName}
-      onChange={(e) => setDialogForm(prev => ({ ...prev, lastName: e.target.value }))}
-      sx={customStyles.textField}
-    />
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={handleCloseDialog} color="primary" sx={customStyles.button}>
-      Annuler
-    </Button>
-    <Button onClick={handleSubmit} color="primary" sx={customStyles.button}>
-      {editingStudent ? 'Mettre à jour' : 'Ajouter'}
-    </Button>
-  </DialogActions>
-</Dialog>
-
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Pagination
+        count={Math.ceil(filteredStudents.length / itemsPerPage)}
+        page={page}
+        onChange={(e, value) => setPage(value)}
+        sx={customStyles.pagination}
+      />
     </Box>
-  );
+
+    <Dialog 
+      open={openDialog} 
+      onClose={handleCloseDialog} 
+      sx={customStyles.dialog}
+    >
+      <DialogTitle>
+        {editingStudent ? 'Modifier un étudiant' : 'Ajouter un étudiant'}
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Prénom"
+          fullWidth
+          variant="outlined"
+          value={dialogForm.firstName}
+          onChange={(e) => setDialogForm(prev => ({ ...prev, firstName: e.target.value }))}
+          sx={customStyles.textField}
+        />
+        <TextField
+          margin="dense"
+          label="Nom"
+          fullWidth
+          variant="outlined"
+          value={dialogForm.lastName}
+          onChange={(e) => setDialogForm(prev => ({ ...prev, lastName: e.target.value }))}
+          sx={customStyles.textField}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button 
+          onClick={handleCloseDialog} 
+          sx={{
+            ...customStyles.button,
+            backgroundColor: 'transparent',
+            color: isDarkMode ? '#ebe7ef' : '#000000',
+            '&:hover': {
+              backgroundColor: alpha('#7925d3', 0.1),
+            }
+          }}
+        >
+          Annuler
+        </Button>
+        <Button 
+          onClick={handleSubmit} 
+          sx={customStyles.button}
+        >
+          {editingStudent ? 'Mettre à jour' : 'Ajouter'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+    <Snackbar
+      open={snackbar.open}
+      autoHideDuration={6000}
+      onClose={handleCloseSnackbar}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+    >
+      <Alert 
+        onClose={handleCloseSnackbar} 
+        severity={snackbar.severity} 
+        sx={{ 
+          width: '100%',
+          backgroundColor: isDarkMode ? '#140524' : '#ffffff',
+          color: isDarkMode ? '#ebe7ef' : '#000000',
+          '& .MuiAlert-icon': {
+            color: snackbar.severity === 'success' ? '#4caf50' : '#f44336'
+          }
+        }}
+      >
+        {snackbar.message}
+      </Alert>
+    </Snackbar>
+  </Box>
+);
 };
 
 export default StudentsManager;
