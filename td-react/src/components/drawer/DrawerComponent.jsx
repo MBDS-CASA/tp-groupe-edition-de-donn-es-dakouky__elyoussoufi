@@ -192,11 +192,7 @@ const DrawerComponent = ({ user }) => {
 
         <List>
           {menuItems.map((item) => {
-            // Filter menu items based on user role
-            if (userRole !== 'ADMIN' && 
-                ['about', 'notes', 'students', 'subjects', 'dashboard'].includes(item.id)) {
-              return null;
-            }
+           
 
             return (
               <StyledListItem
